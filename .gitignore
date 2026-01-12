@@ -1,0 +1,42 @@
+# Build output directories
+/build/
+/cmake-build-*/
+
+# CMake / Ninja / Make artefacts
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.ninja
+*.ninja_deps
+*.ninja_log
+compile_commands.json
+
+# ESP-IDF generated files
+sdkconfig
+sdkconfig.old
+dependencies.lock
+project_description.json
+
+# Temporary files
+*.swp
+*.swo
+*~
+*.tmp
+*.log
+
+# IDE/Editor spezifisch
+.vscode/
+.idea/
+*.iml
+
+# Python/venv caches
+__pycache__/
+*.pyc
+.venv/
+.env/
+
+
+managed_components/
+
+.clangd
