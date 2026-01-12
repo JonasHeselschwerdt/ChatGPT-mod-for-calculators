@@ -3,8 +3,7 @@
 // secret.h -> Add wifi credentials and API Keys (this is a template)
 
 // © 2026 Jonas Heselschwerdt
-// Free for personal, research and educational use
-// Commercial use requires written permission
+// Licensed under CC BY-NC 4.0
 
 /*/
 

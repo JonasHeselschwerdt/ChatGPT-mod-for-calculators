@@ -58,8 +58,7 @@ If you find bugs in the firmware or you need help setting the device up you can 
 - Adding more storage
 
 © 2026 Jonas Heselschwerdt
-Free for personal, research and educational use
-Commercial use requires written permission
+Licensed under CC BY-NC 4.0
 
 
 

@@ -3,8 +3,7 @@
 // config.h -> Non-user-changeable Settings and Pin definitions for all .c files
 
 // © 2026 Jonas Heselschwerdt
-// Free for personal, research and educational use
-// Commercial use requires written permission
+// Licensed under CC BY-NC 4.0
 
 
 

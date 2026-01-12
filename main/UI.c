@@ -3,8 +3,7 @@
 // UI.c -> Functions and variables to run the UI with the 4x20 DOGM204 LCD and the TCA8418
 
 // © 2026 Jonas Heselschwerdt
-// Free for personal, research and educational use
-// Commercial use requires written permission
+// Licensed under CC BY-NC 4.0
 
 
 
