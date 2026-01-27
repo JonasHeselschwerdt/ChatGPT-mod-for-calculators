@@ -10,7 +10,7 @@ This is an independent modification, I am not affiliated with Casio Computer Co.
 
 For a more detailed explanation of the project you can visit my Youtube Channel where I give an overview of the device.
 
-(Youtube video not uploaded yet)
+[![Linked Image](https://img.youtube.com/vi/Xx7Nprghpbg/maxresdefault.jpg)](https://youtu.be/Xx7Nprghpbg)
 
 # Hardware description
 
@@ -42,7 +42,13 @@ For information on how to program the device you can watch my Youtube Video, whe
 
 I do not plan on adding any new features to the device in the near future, if that changes however I will add the new features or bug fixes here.
 
-If you find bugs in the firmware or you need help setting the device up you can contact me on Youtube or instagram, feel free to build upon my work and add features, the ESP32 is powerful enough to run more complex code, there is also plenty of space left on the PCB and some free GPIOs for add-ons.
+If you find bugs in the firmware or you need help setting the device up you can contact me on Youtube, Instagram or here on Github.
+
+Youtube: @ElectrJonics
+
+Instagram: @jonas.hes04
+
+Feel free to build upon my work and add features, the ESP32 is powerful enough to run more complex code, there is also plenty of space left on the PCB and some free GPIOs for add-ons.
 
 # Inspiration for add-ons and missing features
 
