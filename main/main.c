@@ -15,11 +15,13 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
+#include "driver/rtc_io.h"
 
 #include "config.h"
 #include "UI.h"
 #include "network.h"
 #include "secret.h"
+#include "keyset.h"
 
 void app_main(void){
 
@@ -30,11 +32,11 @@ void app_main(void){
     pin_mask |= (1ULL << RS);
     pin_mask |= (1ULL << RW);
     pin_mask |= (1ULL << E);
+    pin_mask |= (1ULL << PE);
     pin_mask |= (1ULL << D4);
     pin_mask |= (1ULL << D5);
     pin_mask |= (1ULL << D6);
     pin_mask |= (1ULL << D7);
-    pin_mask |= (1ULL << PE);
     pin_mask |= (1ULL << KeyEn);
     pin_mask |= (1ULL << diagnose);
 
@@ -47,17 +49,25 @@ void app_main(void){
     };
     gpio_config(&io_conf);
 
-    // Power latch and flash diagnostics LED
+    // Power Latch
 
     gpio_set_level(PE,1);
-    gpio_set_level(diagnose,1);
-    vTaskDelay(pdMS_TO_TICKS(200));
-    gpio_set_level(diagnose,0);
+
+    nvs_flash_init();
+
+    // Did the device reboot to start HID Mode?
+    // If yes initialize USB HID device (needs to be done quickly after booting)
+
+    char boot_mode_buf[16];
+    settings_get_str("Boot_Mode",boot_mode_buf,sizeof(boot_mode_buf));
+
+    if (boot_mode_buf[0] == 'u'){
+        hid_mode_start();
+    }
 
     // Initialize Hardware
 
     UI_init();
-    setcursor(0,1);
 
     uint8_t keyregister[10];
     uint8_t keyregister_old[10];
@@ -65,67 +75,132 @@ void app_main(void){
     for (int i = 0; i<10 ;i++) keyregister_old[i] = 0x00;
 
     Cursor cursor = {0,0};
+    initialize_cursor(&cursor);
+    setcursor(1,1);
 
-    print_start_screen(cursor);
+    set_display_cursor(0, 0);       // Initial curser coordinates in stealth mode
 
-    nvs_flash_init();
     wifi_credentials_nvs_init();
     preset_test_credentials();
     wifi_manager_start();
 
-    // Initialize scribble page, set UI_mode to scribble mode
-    // First 20 characters show the scribble_mode header
+    littlefs_init();
 
-    UI_mode = 's';
+    if (boot_mode_buf[0] == 'u'){
 
-    for (int i=20;i < scribble_page_length; i++){
+        UI_mode = 'k';
+        clear_display();
+        print_line("Device in USB Keypad",1,&cursor);
+        print_line("mode, [Menu] = Leave",2,&cursor);
+        setcursor(0,1);
+        keypad_mode = 'u';
 
-        scribble_page[i] = 0x20;  // Space characters everywhere
+    }
+    else{
+        UI_mode = 'c';      // Start out in stealth mode
     }
 
-    insert_scribble_header('c'); // c = command (edit prompt mode)
+
+    // Initialize scribble page without printing
+
+    for (int i=20;i < scribble_page_length; i++){
+        scribble_page[i] = 0x20;  // Space characters everywhere
+    }
 
     // Initialize answer page (without printing)
 
     for (int i=0;i < answer_page_length; i++){
-
         answer_page[i] = ' ';   // Space characters everywhere
     }
     answer_page[answer_page_length] = '\0';  // Terminate string
 
-    print_scribble_page();
+    // Load auto save setting from NVS
 
-    // Make sure the cursor starts in line 1! not in line 0 (reserved for scribble page header)
+    char autooff_char_buf[8];
+    if (settings_get_str("autooff",autooff_char_buf,sizeof(autooff_char_buf)) != ESP_OK){
+        autooff_mins = 2;
+    }
+    else{
+        autooff_mins = (uint8_t)atoi(autooff_char_buf);
+        if (autooff_mins == 0){
+            autooff_mins = 2;
+        }
+    }
 
-    initialize_cursor(&cursor);
-    setcursor(1,1);
-    
-    // Main Loop:
+    // Main Loop: (USB HID mode)
 
-    while (true){  
+    while(boot_mode_buf[0] == 'u'){
+
+        // Device stuck in USB HID Mode until shutdown or restart back to normal mode!
+
+        vTaskDelay(pdMS_TO_TICKS(LOOP_DELAYTIME));
+
+        if (autooff_timer > (LOOPS_PER_MINUTE * autooff_mins)){
+
+            device_shutdown(cursor);
+        }
+
+        if (gpio_get_level(KeyInt) == 0){
+
+            autooff_timer = 0;
+            update_keyregister(keyregister,keyregister_old);
+            handle_keyregister_keypad(keyregister,keyregister_old,&cursor);
+        }
+
+        else{
+
+            autooff_timer++;
+        }
+
+    }
+
+    // Main Loop (normal mode):
+
+    while (boot_mode_buf[0] != 'u'){  
+
+        while(UI_mode == 'c'){
+
+            // Stealth mode main loop
+
+            vTaskDelay(pdMS_TO_TICKS(LOOP_DELAYTIME));
+
+            if (autooff_timer > (LOOPS_PER_MINUTE * autooff_mins)){
+                device_shutdown(cursor);
+            }
+
+            if (gpio_get_level(KeyInt) == 0){
+
+                autooff_timer = 0;
+                update_keyregister(keyregister,keyregister_old);
+                handle_key_register_stealth(keyregister,keyregister_old,&cursor);
+            }
+            else{
+                autooff_timer++;
+            }
+
+        }
 
         while(UI_mode == 's'){
 
             // Scribble Mode main loop
 
-            vTaskDelay(pdMS_TO_TICKS(10));
+            vTaskDelay(pdMS_TO_TICKS(LOOP_DELAYTIME));
+
+            if (autooff_timer > (LOOPS_PER_MINUTE * autooff_mins)){
+
+                device_shutdown(cursor);
+                
+            }
 
             if (gpio_get_level(KeyInt) == 0){
 
+                autooff_timer = 0;
                 update_keyregister(keyregister,keyregister_old);
                 handle_key_register_scribble(keyregister,keyregister_old,&cursor);
-                
-                /*/ Debugging: Menu Logging
 
-                ESP_LOGI("Menustate", "Menu state:");
-                ESP_LOGI("Menustate", "  opened_from = %c", menu.opened_from);
-                ESP_LOGI("Menustate", "  main_menu   = %s", menu.main_menu ? "true" : "false");
-                ESP_LOGI("Menustate", "  sub_menu    = %u", menu.sub_menu);
-                ESP_LOGI("Menustate", "  subsub_menu = %u", menu.subsub_menu);
-                ESP_LOGI("Menustate", "  page        = %u", menu.page);
-
-                /*/
-
+            }
+            else{
+                autooff_timer++;
             }
         }
 
@@ -133,24 +208,24 @@ void app_main(void){
 
             // Answer Mode main loop
 
-            vTaskDelay(pdMS_TO_TICKS(10));
+            vTaskDelay(pdMS_TO_TICKS(LOOP_DELAYTIME));
+
+            if (autooff_timer > (LOOPS_PER_MINUTE * autooff_mins)){
+
+                device_shutdown(cursor);
+                
+            }
 
             if(gpio_get_level(KeyInt) == 0){
 
+                autooff_timer = 0;
                 update_keyregister(keyregister,keyregister_old);
                 handle_keyregister_answer(keyregister,keyregister_old,&cursor);
-
-                /*/ Debugging: Menu Logging
-
-                ESP_LOGI("Menustate", "Menu state:");
-                ESP_LOGI("Menustate", "  opened_from = %c", menu.opened_from);
-                ESP_LOGI("Menustate", "  main_menu   = %s", menu.main_menu ? "true" : "false");
-                ESP_LOGI("Menustate", "  sub_menu    = %u", menu.sub_menu);
-                ESP_LOGI("Menustate", "  subsub_menu = %u", menu.subsub_menu);
-                ESP_LOGI("Menustate", "  page        = %u", menu.page);
-
-                /*/
             }
+            else{
+                autooff_timer++;
+            }
+
         }
         
         while(UI_mode == 'm'){
@@ -158,29 +233,75 @@ void app_main(void){
             // Menu Mode main loop
             // Simple menus where you can choose between options
 
-            vTaskDelay(pdMS_TO_TICKS(10));
+            vTaskDelay(pdMS_TO_TICKS(LOOP_DELAYTIME));
+
+            if (autooff_timer > (LOOPS_PER_MINUTE * autooff_mins)){
+
+                device_shutdown(cursor);
+                
+            }
 
             if(gpio_get_level(KeyInt) == 0){
 
+                autooff_timer = 0;
                 update_keyregister(keyregister,keyregister_old);
                 handle_keyregister_menu(keyregister,keyregister_old,&cursor); 
-
-                /*/ Debugging: Menu Logging
-
-                ESP_LOGI("Menustate", "Menu state:");
-                ESP_LOGI("Menustate", "  opened_from = %c", menu.opened_from);
-                ESP_LOGI("Menustate", "  main_menu   = %s", menu.main_menu ? "true" : "false");
-                ESP_LOGI("Menustate", "  sub_menu    = %u", menu.sub_menu);
-                ESP_LOGI("Menustate", "  subsub_menu = %u", menu.subsub_menu);
-                ESP_LOGI("Menustate", "  page        = %u", menu.page);
-
-                /*/
+            }
+            else{
+                autooff_timer++;
             }
 
-            
-
         }
+
+        while(UI_mode == 'h'){
+
+            // HTML viewer mode main loop
+
+            vTaskDelay(pdMS_TO_TICKS(LOOP_DELAYTIME));
+
+            if (autooff_timer > (LOOPS_PER_MINUTE * autooff_mins)){
+
+                device_shutdown(cursor);
+                
+            }
+
+            if(gpio_get_level(KeyInt) == 0){
+
+                autooff_timer = 0;
+                update_keyregister(keyregister,keyregister_old);
+                handle_keyregister_html_view(keyregister,keyregister_old,&cursor); 
+            }
+            else{
+                autooff_timer++;
+            }
         
+        
+        }
+
+        while(UI_mode == 'k'){
+
+            // Keypad mode main loop (HERE BLUETOOTH ONLY, USB IN SEPERATE LOOP)
+
+            vTaskDelay(pdMS_TO_TICKS(10));
+
+            if (autooff_timer > (LOOPS_PER_MINUTE * autooff_mins)){
+
+                device_shutdown(cursor);
+            }
+
+            if (gpio_get_level(KeyInt) == 0){
+
+                autooff_timer = 0;
+                update_keyregister(keyregister,keyregister_old);
+                handle_keyregister_keypad(keyregister,keyregister_old,&cursor);
+            }
+
+            else{
+
+                autooff_timer++;
+            }
+        }
+
     }
 
 }

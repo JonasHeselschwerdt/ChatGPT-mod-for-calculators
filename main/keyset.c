@@ -16,65 +16,204 @@ Key keyset[256];
 
 // Keypad Layout Definition:
 
-void define_keyset(){
+void define_keyset(void){
 
     // Eventkeys -> \0 = Not defined
-    // Hex- Values are from TCA8418 Keyevent Register (see schematics / PCB Layout and TCA8418 datasheet)
+    // Hex- Values (Indices) are from TCA8418 Keyevent Register (see schematics / PCB Layout and TCA8418 datasheet)
 
-    keyset[0xB1] = (Key){SHIFT,'\0','\0','\0'};
-    keyset[0xA7] = (Key){ALPHA,'\0','\0','\0'};
-    keyset[0x9D] = (Key){UP,'u','\0','\0'};
-    keyset[0x92] = (Key){DOWN,'d','\0','\0'};
-    keyset[0x93] = (Key){RIGHT,'r','\0','\0'};
-    keyset[0x9C] = (Key){LEFT,'l','\0','\0'};
-    keyset[0x89] = (Key){MENU,'\0','\0','\0'};
-    keyset[0x8E] = (Key){BACK,'\0','\0','\0'};
-    keyset[0x84] = (Key){ENTER,'\0','\0','\0'};
+    //                  Event          Normal   Shift   Alpha      Stealth  
+
+    keyset[0xB1] = (Key){SHIFT,         '\0',   '\0',   '\0',       '\0'        };
+    keyset[0xA7] = (Key){ALPHA,         '\0',   '\0',   '\0',       '\0'        };
+    keyset[0x9D] = (Key){UP,            'u',    '\0',   '\0',       '\0'        };
+    keyset[0x92] = (Key){DOWN,          'd',    '\0',   '\0',       '\0'        };
+    keyset[0x93] = (Key){RIGHT,         'r',    '\0',   '\0',       '\0'        };
+    keyset[0x9C] = (Key){LEFT,          'l',    '\0',   '\0',       '\0'        };
+    keyset[0x89] = (Key){MENU,          '\0',   '\0',   '\0',       '\0'        };
+    keyset[0x8E] = (Key){BACK,          'b',   '\0',   '\0',       '\0'        };
+    keyset[0x84] = (Key){ENTER,         'e',   '\0',   '\0',       '\0'        };
 
     // Normal Keys
 
-    keyset[0xB0] = (Key){EVENT_NONE,'a','A','@'};
-    keyset[0xA6] = (Key){EVENT_NONE,'b','B','\0'};
-    keyset[0x88] = (Key){EVENT_NONE,'c','C','\0'};
-    keyset[0xAF] = (Key){EVENT_NONE,'d','D','\0'};
-    keyset[0xA5] = (Key){EVENT_NONE,'e','E','\0'};
-    keyset[0x9B] = (Key){EVENT_NONE,'f','F','\0'};
-    keyset[0x91] = (Key){EVENT_NONE,'g','G','\0'};
-    keyset[0x87] = (Key){EVENT_NONE,'h','H','\0'};
-    keyset[0xAE] = (Key){EVENT_NONE,'i','I','\0'};
-    keyset[0xA4] = (Key){EVENT_NONE,'j','J','\0'};
-    keyset[0x9A] = (Key){EVENT_NONE,'k','K','\0'};
-    keyset[0x90] = (Key){EVENT_NONE,'l','L','\0'};
-    keyset[0x86] = (Key){EVENT_NONE,'m','M','\0'};
-    keyset[0xAD] = (Key){EVENT_NONE,'n','N','\0'};
-    keyset[0xA3] = (Key){EVENT_NONE,'o','O','\0'};
-    keyset[0x99] = (Key){EVENT_NONE,'p','P','\0'};
-    keyset[0x8F] = (Key){EVENT_NONE,'q','Q','\0'};
-    keyset[0x85] = (Key){EVENT_NONE,'r','R','\0'};
-    keyset[0xAC] = (Key){EVENT_NONE,'s','S','7'};
-    keyset[0xA2] = (Key){EVENT_NONE,'t','T','8'};
-    keyset[0x98] = (Key){EVENT_NONE,'u','U','9'};
-    keyset[0xAB] = (Key){EVENT_NONE,'v','V','4'};
-    keyset[0xA1] = (Key){EVENT_NONE,'w','W','5'};
-    keyset[0x97] = (Key){EVENT_NONE,'x','X','6'};
-    keyset[0x8D] = (Key){EVENT_NONE,'y','Y','$'};
-    keyset[0x83] = (Key){EVENT_NONE,'z','Z',scharfS};
-    keyset[0xAA] = (Key){EVENT_NONE,'.','*','1'};
-    keyset[0xA0] = (Key){EVENT_NONE,',','\'','2'};
-    keyset[0x96] = (Key){EVENT_NONE,'!','&','3'};
-    keyset[0x8C] = (Key){EVENT_NONE,'?','%','{'};
-    keyset[0x82] = (Key){EVENT_NONE,'/','#','}'};
-    keyset[0xA9] = (Key){EVENT_NONE,'"','^','0'};
-    keyset[0x9F] = (Key){EVENT_NONE,'-','+','_'};
-    keyset[0x95] = (Key){EVENT_NONE,' ','=','\\'};
-    keyset[0x8B] = (Key){EVENT_NONE,'(',':','['};
-    keyset[0x81] = (Key){EVENT_NONE,')',';',']'};
+    //                    Event        Normal   Shift   Alpha      Stealth 
+
+    keyset[0xB0] = (Key){EVENT_NONE,    'a',    'A',    '@',        '\0'     };
+    keyset[0xA6] = (Key){EVENT_NONE,    'b',    'B',    '\0',       '\0'     };
+    keyset[0x88] = (Key){EVENT_NONE,    'c',    'C',    '\0',       '\0'     };
+    keyset[0xAF] = (Key){EVENT_NONE,    'd',    'D',    '\0',       '\0'     };
+    keyset[0xA5] = (Key){EVENT_NONE,    'e',    'E',    '\0',       '\0'     };
+    keyset[0x9B] = (Key){EVENT_NONE,    'f',    'F',    '\0',       '\0'     };
+    keyset[0x91] = (Key){EVENT_NONE,    'g',    'G',    '\0',       '\0'     };
+    keyset[0x87] = (Key){EVENT_NONE,    'h',    'H',    '\0',       '\0'     };
+    keyset[0xAE] = (Key){EVENT_NONE,    'i',    'I',    '\0',       '\0'     };
+    keyset[0xA4] = (Key){EVENT_NONE,    'j',    'J',    '\0',       '\0'     };
+    keyset[0x9A] = (Key){EVENT_NONE,    'k',    'K',    '\0',       '\0'     };
+    keyset[0x90] = (Key){EVENT_NONE,    'l',    'L',    '\0',       '\0'     };
+    keyset[0x86] = (Key){EVENT_NONE,    'm',    'M',    '\0',       '\0'     };
+    keyset[0xAD] = (Key){EVENT_NONE,    'n',    'N',    '\0',       '\0'     };
+    keyset[0xA3] = (Key){EVENT_NONE,    'o',    'O',    '\0',       '\0'     };
+    keyset[0x99] = (Key){EVENT_NONE,    'p',    'P',    '\0',       '\0'     };
+    keyset[0x8F] = (Key){EVENT_NONE,    'q',    'Q',    '\0',       '\0'     };
+    keyset[0x85] = (Key){EVENT_NONE,    'r',    'R',    '\0',       '\0'     };
+    keyset[0xAC] = (Key){EVENT_NONE,    's',    'S',    '7',        '7'     };
+    keyset[0xA2] = (Key){EVENT_NONE,    't',    'T',    '8',        '8'     };
+    keyset[0x98] = (Key){EVENT_NONE,    'u',    'U',    '9',        '9'     };
+    keyset[0xAB] = (Key){EVENT_NONE,    'v',    'V',    '4',        '4'     };
+    keyset[0xA1] = (Key){EVENT_NONE,    'w',    'W',    '5',        '5'     };
+    keyset[0x97] = (Key){EVENT_NONE,    'x',    'X',    '6',        '6'     };
+    keyset[0x8D] = (Key){EVENT_NONE,    'y',    'Y',    '$',        '*'     };
+    keyset[0x83] = (Key){EVENT_NONE,    'z',    'Z',    scharfS,    '/'     };
+    keyset[0xAA] = (Key){EVENT_NONE,    '.',    '*',    '1',        '1'     };
+    keyset[0xA0] = (Key){EVENT_NONE,    ',',    '\'',   '2',        '2'     };
+    keyset[0x96] = (Key){EVENT_NONE,    '!',    '&',    '3',        '3'     };
+    keyset[0x8C] = (Key){EVENT_NONE,    '?',    '%',    '{',        '+'     };
+    keyset[0x82] = (Key){EVENT_NONE,    '/',    '#',    '}',        '-'     };
+    keyset[0xA9] = (Key){EVENT_NONE,    '"',    '^',    '0',        '0'     };
+    keyset[0x9F] = (Key){EVENT_NONE,    '-',    '+',    '_',        '.'     };
+    keyset[0x95] = (Key){EVENT_NONE,    ' ',    '=',    '\\',       '\0'    };
+    keyset[0x8B] = (Key){EVENT_NONE,    '(',    ':',    '[',        'a'     };         // a in stealth mode refers to ans(wer)
+    keyset[0x81] = (Key){EVENT_NONE,    ')',    ';',    ']',        '='     };
 
 }
 
+Hid_Key hid_LUT[256];       // Look up table, char (8bit address) as input, modifier byte + usage ID byte as output
+                            // as specified by USB implementers forum
+
+Special_Hid_Key special_hid_LUT[128];
+
+void setup_special_hid_LUT(char orient){
+
+    if (orient == 'h'){
+
+        // Horizontal keyboard layout
+
+        special_hid_LUT['e'] = (Special_Hid_Key){ENTER,0x28,MOD_NONE};
+        special_hid_LUT['b'] = (Special_Hid_Key){BACK,0x2A,MOD_NONE};
+        special_hid_LUT['d'] = (Special_Hid_Key){DOWN,0x4F,MOD_NONE};
+        special_hid_LUT['u'] = (Special_Hid_Key){UP,0x50,MOD_NONE};
+        special_hid_LUT['r'] = (Special_Hid_Key){RIGHT,0x52,MOD_NONE};
+        special_hid_LUT['l'] = (Special_Hid_Key){LEFT,0x51,MOD_NONE};
+    }
+    else{
+
+        // Vertical keyboard layout
+
+        special_hid_LUT['e'] = (Special_Hid_Key){ENTER,0x28,MOD_NONE};
+        special_hid_LUT['b'] = (Special_Hid_Key){BACK,0x2A,MOD_NONE}; 
+        special_hid_LUT['d'] = (Special_Hid_Key){DOWN,0x51,MOD_NONE};
+        special_hid_LUT['u'] = (Special_Hid_Key){UP,0x52,MOD_NONE};
+        special_hid_LUT['r'] = (Special_Hid_Key){RIGHT,0x4F,MOD_NONE};
+        special_hid_LUT['l'] = (Special_Hid_Key){LEFT,0x50,MOD_NONE};
+
+    }
+
+}
+
+void setup_hid_LUT(void){
+
+
+    for (int i=0;i<256;i++) hid_LUT[i] = (Hid_Key){0x00,0xFF};      // default values for inaccesible keys (restricted by layout)
+
+    hid_LUT['a'] = (Hid_Key){0x04,MOD_NONE};
+    hid_LUT['b'] = (Hid_Key){0x05,MOD_NONE};
+    hid_LUT['c'] = (Hid_Key){0x06,MOD_NONE};
+    hid_LUT['d'] = (Hid_Key){0x07,MOD_NONE};
+    hid_LUT['e'] = (Hid_Key){0x08,MOD_NONE};
+    hid_LUT['f'] = (Hid_Key){0x09,MOD_NONE};
+    hid_LUT['g'] = (Hid_Key){0x0A,MOD_NONE};
+    hid_LUT['h'] = (Hid_Key){0x0B,MOD_NONE};
+    hid_LUT['i'] = (Hid_Key){0x0C,MOD_NONE};
+    hid_LUT['j'] = (Hid_Key){0x0D,MOD_NONE};
+    hid_LUT['k'] = (Hid_Key){0x0E,MOD_NONE};
+    hid_LUT['l'] = (Hid_Key){0x0F,MOD_NONE};
+    hid_LUT['m'] = (Hid_Key){0x10,MOD_NONE};
+    hid_LUT['n'] = (Hid_Key){0x11,MOD_NONE};
+    hid_LUT['o'] = (Hid_Key){0x12,MOD_NONE};
+    hid_LUT['p'] = (Hid_Key){0x13,MOD_NONE};
+    hid_LUT['q'] = (Hid_Key){0x14,MOD_NONE};
+    hid_LUT['r'] = (Hid_Key){0x15,MOD_NONE};
+    hid_LUT['s'] = (Hid_Key){0x16,MOD_NONE};
+    hid_LUT['t'] = (Hid_Key){0x17,MOD_NONE};
+    hid_LUT['u'] = (Hid_Key){0x18,MOD_NONE};
+    hid_LUT['v'] = (Hid_Key){0x19,MOD_NONE};
+    hid_LUT['w'] = (Hid_Key){0x1A,MOD_NONE};
+    hid_LUT['x'] = (Hid_Key){0x1B,MOD_NONE};
+    hid_LUT['y'] = (Hid_Key){0x1C,MOD_NONE};
+    hid_LUT['z'] = (Hid_Key){0x1D,MOD_NONE};
+    
+    hid_LUT['A'] = (Hid_Key){0x04,MOD_SHIFT};
+    hid_LUT['B'] = (Hid_Key){0x05,MOD_SHIFT};
+    hid_LUT['C'] = (Hid_Key){0x06,MOD_SHIFT};
+    hid_LUT['D'] = (Hid_Key){0x07,MOD_SHIFT};
+    hid_LUT['E'] = (Hid_Key){0x08,MOD_SHIFT};
+    hid_LUT['F'] = (Hid_Key){0x09,MOD_SHIFT};
+    hid_LUT['G'] = (Hid_Key){0x0A,MOD_SHIFT};
+    hid_LUT['H'] = (Hid_Key){0x0B,MOD_SHIFT};
+    hid_LUT['I'] = (Hid_Key){0x0C,MOD_SHIFT};
+    hid_LUT['J'] = (Hid_Key){0x0D,MOD_SHIFT};
+    hid_LUT['K'] = (Hid_Key){0x0E,MOD_SHIFT};
+    hid_LUT['L'] = (Hid_Key){0x0F,MOD_SHIFT};
+    hid_LUT['M'] = (Hid_Key){0x10,MOD_SHIFT};
+    hid_LUT['N'] = (Hid_Key){0x11,MOD_SHIFT};
+    hid_LUT['O'] = (Hid_Key){0x12,MOD_SHIFT};
+    hid_LUT['P'] = (Hid_Key){0x13,MOD_SHIFT};
+    hid_LUT['Q'] = (Hid_Key){0x14,MOD_SHIFT};
+    hid_LUT['R'] = (Hid_Key){0x15,MOD_SHIFT};
+    hid_LUT['S'] = (Hid_Key){0x16,MOD_SHIFT};
+    hid_LUT['T'] = (Hid_Key){0x17,MOD_SHIFT};
+    hid_LUT['U'] = (Hid_Key){0x18,MOD_SHIFT};
+    hid_LUT['V'] = (Hid_Key){0x19,MOD_SHIFT};
+    hid_LUT['W'] = (Hid_Key){0x1A,MOD_SHIFT};
+    hid_LUT['X'] = (Hid_Key){0x1B,MOD_SHIFT};
+    hid_LUT['Y'] = (Hid_Key){0x1C,MOD_SHIFT};
+    hid_LUT['Z'] = (Hid_Key){0x1D,MOD_SHIFT};
+
+    hid_LUT['0'] = (Hid_Key){0x27,MOD_NONE};
+    hid_LUT['1'] = (Hid_Key){0x1E,MOD_NONE};
+    hid_LUT['2'] = (Hid_Key){0x1F,MOD_NONE};
+    hid_LUT['3'] = (Hid_Key){0x20,MOD_NONE};
+    hid_LUT['4'] = (Hid_Key){0x21,MOD_NONE};
+    hid_LUT['5'] = (Hid_Key){0x22,MOD_NONE};
+    hid_LUT['6'] = (Hid_Key){0x23,MOD_NONE};
+    hid_LUT['7'] = (Hid_Key){0x24,MOD_NONE};
+    hid_LUT['8'] = (Hid_Key){0x25,MOD_NONE};
+    hid_LUT['9'] = (Hid_Key){0x26,MOD_NONE};
+    
+    hid_LUT['@'] = (Hid_Key){0x1F,MOD_SHIFT};
+    hid_LUT['$'] = (Hid_Key){0x21,MOD_SHIFT};
+    hid_LUT['.'] = (Hid_Key){0x37,MOD_NONE};
+    hid_LUT['*'] = (Hid_Key){0x25,MOD_SHIFT};
+    hid_LUT[','] = (Hid_Key){0x36,MOD_NONE};
+    hid_LUT['\''] = (Hid_Key){0x34,MOD_NONE};
+    hid_LUT['!'] = (Hid_Key){0x1E,MOD_SHIFT};
+    hid_LUT['&'] = (Hid_Key){0x24,MOD_SHIFT};
+    hid_LUT['?'] = (Hid_Key){0x38,MOD_SHIFT};
+    hid_LUT['%'] = (Hid_Key){0x22,MOD_SHIFT};
+    hid_LUT['{'] = (Hid_Key){0x2F,MOD_SHIFT};
+    hid_LUT['/'] = (Hid_Key){0x38,MOD_NONE};
+    hid_LUT['#'] = (Hid_Key){0x20,MOD_SHIFT};
+    hid_LUT['}'] = (Hid_Key){0x30,MOD_SHIFT};
+    hid_LUT['"'] = (Hid_Key){0x34,MOD_SHIFT};
+    hid_LUT['^'] = (Hid_Key){0x23,MOD_SHIFT};
+    hid_LUT['-'] = (Hid_Key){0x2D,MOD_NONE};
+    hid_LUT['+'] = (Hid_Key){0x2E,MOD_SHIFT};
+    hid_LUT['_'] = (Hid_Key){0x2D,MOD_SHIFT};
+    hid_LUT[' '] = (Hid_Key){0x2C,MOD_NONE};
+    hid_LUT['='] = (Hid_Key){0x2E,MOD_NONE};
+    hid_LUT['\\'] = (Hid_Key){0x31,MOD_NONE};
+    hid_LUT['('] = (Hid_Key){0x26,MOD_SHIFT};
+    hid_LUT[';'] = (Hid_Key){0x33,MOD_NONE};
+    hid_LUT['['] = (Hid_Key){0x2F,MOD_NONE};
+    hid_LUT[')'] = (Hid_Key){0x27,MOD_SHIFT};
+    hid_LUT[':'] = (Hid_Key){0x33,MOD_SHIFT};
+    hid_LUT[']'] = (Hid_Key){0x30,MOD_NONE};
+
+}
+
+
 uint8_t lcd_charset[256];
 
-void setup_charset(){
+void setup_charset(void){
 
     for (int i = 0; i < 256; i++) lcd_charset[i] = 0x00;
     

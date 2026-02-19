@@ -20,7 +20,7 @@ To get the hardware you will need to order the correct parts and send the gerber
 
 # Firmware description
 
-The code is written in C in the ESP-IDF extension for VSCode, for connecting to OpenAI I use the official Espressif OpenAI component. To understand the code, use my comments, the file 'File structure description' and the youtube video.
+The code is written in C in the ESP-IDF extension for VSCode, for connecting to OpenAI I use the official Espressif OpenAI component. To understand the code, use my comments, the file 'File structure description', and the youtube video.
 
 # Device setup, programming and UI
 
@@ -40,9 +40,12 @@ For information on how to program the device you can watch my Youtube Video, whe
 
 # The future of this project
 
-I do not plan on adding any new features to the device in the near future, if that changes however I will add the new features or bug fixes here.
+Originally when I made the first Youtube-Video about the device I did not plan to add more features, however that changed
+due to the positive feedback on my first video. There are a lot of changes coming to the device in the next months, I added my 
+Todo List in the changelog.
 
 If you find bugs in the firmware or you need help setting the device up you can contact me on Youtube, Instagram or here on Github.
+Of course I am open to suggestions and collaborations!
 
 Youtube: @ElectrJonics
 
@@ -50,20 +53,9 @@ Instagram: @jonas.hes04
 
 Feel free to build upon my work and add features, the ESP32 is powerful enough to run more complex code, there is also plenty of space left on the PCB and some free GPIOs for add-ons.
 
-# Inspiration for add-ons and missing features
-
-- NVS encryption for API Keys and Wifi credentials
-- Adding bluetooth capabilities
-- Ability to change GPT Model
-- Adding an auto-off timer
-- Ability to set the contrast of the display
-- Ability for 'over the Air' firmware updates
-- Adding transceivers for different communication protocols to the PCB
-- Adding games to the calculator
-- Adding a camera
-- Adding more storage
 
 © 2026 Jonas Heselschwerdt
+
 Licensed under CC BY-NC 4.0
 
 

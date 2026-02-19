@@ -41,6 +41,14 @@ extern char extracted[scribble_page_length+1];
 
 extern Menu menu;
 
+extern uint16_t html_menu[9];
+extern char url[64];
+extern uint8_t html_text_passage;
+extern char current_html_text[81];
+
+extern uint8_t autooff_mins;
+extern uint32_t autooff_timer;
+
 void UI_init(void);
 void update_keyregister(uint8_t* registerpointer, uint8_t* registerpointer_old);
 void print_start_screen(Cursor cursor);
@@ -50,7 +58,18 @@ void insert_scribble_header(char scribble_mode);
 void print_scribble_page(void);
 void initialize_cursor(Cursor* cursor);
 void handle_keyregister_menu(uint8_t* registerpointer, uint8_t* registerpointer_old, Cursor* cursor);
-
+void handle_keyregister_html_view(uint8_t* registerpointer, uint8_t* registerpointer_old, Cursor* cursor);
 void handle_keyregister_answer(uint8_t* registerpointer, uint8_t* registerpointer_old, Cursor* cursor);
+void print_screen(const char* print_text, Cursor *cursor);
+void handle_key_register_stealth(uint8_t* registerpointer, uint8_t* registerpointer_old, Cursor* cursor);
+void moveCursor(char direction, Cursor *cursor);
+void set_display_cursor(uint8_t x, uint8_t y);
+void device_shutdown(Cursor cursor);
+void handle_keyregister_keypad(uint8_t* registerpointer, uint8_t* registerpointer_old, Cursor* cursor);
+void print_line(const char* print_text, uint8_t line, Cursor* cursor);
+void clear_display(void);
+
+extern char keypad_mode;
+
 
 #endif

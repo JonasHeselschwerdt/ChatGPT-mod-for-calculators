@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include "esp_log.h"
 #include "network.h"
+#include <stdbool.h>
 
 
 
@@ -160,7 +161,7 @@ char extracted[scribble_page_length+1];
 
 
 // This message gets added to each prompt the user types in
-const char *answer_instructions = "Note: Answer in a string of up to 480 characters, use only 7-bit ASCII signs, answer in the language used before this note, if unclear use english. Do not refer to this note in your answer";
+const char *answer_instructions = "Note: Answer in a string of up to 4800 characters, use only 7-bit ASCII signs, answer in the language used before this note, if unclear use english. Do not refer to this note in your answer";
 
 // Variable that keeps track of the menu the user is in
 Menu menu = {'s',false,0,0,0};
@@ -176,6 +177,24 @@ uint8_t prompt_copy[scribble_page_length];  // temporarily save the prompt when 
 
 char proposed_ssid[32];
 char proposed_pass[64];
+
+// Auto off settings
+
+uint8_t autooff_mins = 2;
+uint32_t autooff_timer = 0;
+
+// HTML viewing mode variables
+
+uint16_t html_menu[9] = {0,0,0,0,0,0,0,0,0};        // current location of the html viewer within the 9 texts 
+                                                    // see https server hosting tool
+
+uint8_t html_text_passage = 0;              // 0-8 (Text 1 - 9)
+char current_html_text[81];
+
+// Keypad mode varriables
+
+char keypad_orient = 'v';       // default 'v' (vertical) alternatively 'h' (horizontal)
+char keypad_mode = 'u';          // deafult 'u' (USB) alternatively 'b' (bluetooth)      
 
 
 void insert_scribble_header(char scribble_mode){
@@ -654,6 +673,32 @@ void print_line(const char* print_text, uint8_t line, Cursor* cursor){
     }
 }
 
+void print_screen(const char* print_text, Cursor *cursor){
+
+    // Prints out an 80 sign long text on the display
+    
+    char text_line1[21];
+    char text_line2[21];
+    char text_line3[21];
+    char text_line4[21];
+
+    memcpy(text_line1, print_text +  0, 20);
+    memcpy(text_line2, print_text + 20, 20);
+    memcpy(text_line3, print_text + 40, 20);
+    memcpy(text_line4, print_text + 60, 20);
+
+    text_line1[20] = '\0';
+    text_line2[20] = '\0';
+    text_line3[20] = '\0';
+    text_line4[20] = '\0';
+
+    print_line(text_line1,0,cursor);
+    print_line(text_line2,1,cursor);
+    print_line(text_line3,2,cursor);
+    print_line(text_line4,3,cursor);
+
+}
+
 void print_scribble_page(void){
 
     // Function that prints the content from scribble_page out
@@ -690,6 +735,25 @@ void print_scribble_page(void){
     }
 }
 
+void print_answer_page(Cursor cursor)
+{
+    char line[21]; 
+
+    int base_line = current_page_answer * 4;
+
+    for (int row = 0; row < 4; row++) {
+
+        int line_index = base_line + row;
+        int src_offset = line_index * 20;
+
+        strncpy(line, &answer_page[src_offset], 20);
+        line[20] = '\0';
+
+        print_line(line, row, &cursor);
+    }
+}
+
+/*/
 void print_answer_page(Cursor cursor){
 
     // split the answer page into ((max_pages_answer + 1) *4) strings, each with 20 characters!
@@ -711,6 +775,7 @@ void print_answer_page(Cursor cursor){
     }
     
 }
+/*/
 
 void print_menu(Cursor cursor){
 
@@ -723,11 +788,11 @@ void print_menu(Cursor cursor){
             print_line(" Edit WIFI List     ",0,&cursor);
             print_line(" Edit OpenAI API Key",1,&cursor);
             print_line(" GPT Model Selection",2,&cursor);
-            print_line(" Auto Off Timer     ",3,&cursor);
+            print_line(" Enter Keypad Mode  ",3,&cursor);
         }
         else if (menu.page == 1){
 
-            print_line(" Set Contrast       ",0,&cursor);
+            print_line(" Auto-off timer     ",0,&cursor);
             print_line(" Factory Reset      ",1,&cursor);
             print_line(" Firmware Info      ",2,&cursor);
             print_line("                    ",3,&cursor);
@@ -764,6 +829,24 @@ void print_menu(Cursor cursor){
 
     }
 
+    else if ((menu.sub_menu == 4) && (menu.subsub_menu == 0)){
+
+        print_line(" Start USB Keypad   ",0,&cursor);
+        print_line(" Start BLE Keypad   ",1,&cursor);
+        print_line(" Set Keypad Layout  ",2,&cursor);
+        print_line("                    ",3,&cursor);       
+
+    }
+
+    else if ((menu.sub_menu == 4) && (menu.subsub_menu == 3)){
+
+        print_line(" Vertical Keypad    ",0,&cursor);
+        print_line(" Horizontal Keypad  ",1,&cursor);
+        print_line("                    ",2,&cursor);
+        print_line("                    ",3,&cursor);       
+
+    }
+
     else if ((menu.sub_menu == 3) && (menu.subsub_menu == 0)){
 
         print_line(" GPT 3.5-Turbo      ",0,&cursor);
@@ -771,6 +854,24 @@ void print_menu(Cursor cursor){
         print_line("                    ",2,&cursor);
         print_line("                    ",3,&cursor);
 
+    }
+
+    else if ((menu.sub_menu == 5) && (menu.subsub_menu == 0)){
+
+        print_line(" Auto off @  1 min  ",0,&cursor);
+        print_line(" Auto off @  2 min  ",1,&cursor);
+        print_line(" Auto off @  5 min  ",2,&cursor);
+        print_line(" Auto off @ 15 min  ",3,&cursor);
+
+
+    }
+
+    else if ((menu.sub_menu == 6) && (menu.subsub_menu == 0)){
+
+        print_line(" Yes, reset device  ",0,&cursor);
+        print_line(" No, cancel reset   ",1,&cursor);
+        print_line("                    ",2,&cursor);
+        print_line("                    ",3,&cursor);
     }
 
     else{
@@ -833,12 +934,18 @@ char* extract_scribble_page(){      // extract what the user typed in
 // Various other functions and variables
 
 
-void shutdown(void){
+void device_shutdown(Cursor cursor){
 
     setcursor(0,1);
-    bitBang(0,0,0x01);      // Clear Display DDRAM
+    bitBang(0,0,0x01);              // Clear Display DDRAM
+
+    // Print shutdown info screen
+
+    print_line(" Device is shutting ",1,&cursor);
+    print_line("       down         ",2,&cursor);
+    
     gpio_set_level(KeyEn,0);
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(500));
     gpio_set_level(PE,0);
 
 }
@@ -848,6 +955,11 @@ char UI_mode = 's';     // The mode in which the UI currently is
 // s = scribble
 // a = answer
 // m = menu
+// h = html viewer
+// c = calculator (stealth mode)
+// k = keypad mode (HID)
+
+char url[64] = "http://192.168.";
 
 
 
@@ -863,6 +975,8 @@ void UI_init(void){
     tca8418_init();
     define_keyset();
     lcd_init();
+    setup_hid_LUT();
+    setup_special_hid_LUT('v');
 
 }
 
@@ -938,49 +1052,26 @@ void print_start_screen(Cursor cursor){
 
     //
 
-    print_line("    INDEPENDANT     ",1,&cursor);
-    print_line("    MODIFICATION    ",2,&cursor);
-
-    vTaskDelay(pdMS_TO_TICKS(1500));
-    clear_display();
-
-    //
-
-    print_line("NOT AFFILIATED WITH ",0,&cursor);
-    print_line(" CASIO COMPUTER CO.,",1,&cursor);
-    print_line("    LTD. OR CASIO   ",2,&cursor);
-    print_line("    EUROPE GMBH     ",3,&cursor);
-
-    vTaskDelay(pdMS_TO_TICKS(2500));
-    clear_display();
-
-    //
-
     print_line("   DEVELOPED  BY    ",1,&cursor);
     print_line("JONAS HESELSCHWERDT ",2,&cursor);
 
     vTaskDelay(pdMS_TO_TICKS(2500));
     clear_display();
-
-    //
-
-    print_line(" FIRMWARE VERSION:  ",1,&cursor);
-    print_line(" Prototype v.1.0.1  ",2,&cursor);
-
-    vTaskDelay(pdMS_TO_TICKS(1500));
-    clear_display();
-
-    //
-
-    print_line("   ASK CHATGPT A    ",1,&cursor);
-    print_line("     QUESTION!      ",2,&cursor);
-
-    vTaskDelay(pdMS_TO_TICKS(2500));
-    clear_display();
-
-    //
     
 }
+
+void print_firmware_info(Cursor cursor){
+
+    clear_display();
+    setcursor(0,1);
+    print_line("Installed Firmware: ",1,&cursor);
+    print_line(firmware_version,2,&cursor);
+    vTaskDelay(pdMS_TO_TICKS(3000));
+    setcursor(1,0);
+    clear_display();
+
+}
+
 
 void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpointer_old, Cursor* cursor){
 
@@ -994,7 +1085,7 @@ void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpoi
 
         if (registerpointer[0] != 0){
 
-            // Keyereleases ignorieren
+            // Ignore Keyreleases
 
             if (registerpointer[0] != registerpointer_old[0]){
 
@@ -1004,9 +1095,7 @@ void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpoi
                 injection_point = injection_point + (current_page_scribble * 80);
                 injection_point = injection_point + (cursor->y * 20);
                 injection_point = injection_point + (cursor->x);
-
-
-
+                
                 // Only print if this key was not in the register before
                 // Another keypress might have triggered the interrupt of the tca8418 as well
                 
@@ -1069,7 +1158,7 @@ void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpoi
             else if (((keyset[registerpointer[1]].event_key) == MENU)){
 
                 // SHIFT + MENU = Shutdown system
-                shutdown();
+                device_shutdown(*cursor);
             }
         }
     }
@@ -1156,7 +1245,7 @@ void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpoi
 
     else if(((keyset[registerpointer[0]].event_key) == ENTER)){
 
-        // ENTER allows you to leave scribble mode to get into the answer mode!
+        // ENTER allows you to leave scribble mode to get into the answer mode (or html viewer mode)!
 
         if (registerpointer[0] != 0){
 
@@ -1166,47 +1255,148 @@ void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpoi
 
                 if (menu.main_menu == false){
 
-                    UI_mode = 'a';   // set UI_mode to a -> change into answer mode after completing this iteration
-                                     // of handle_keyregister_scribble
-
-                    current_page_answer = 0;
-                
-                    setcursor(0,1);   // turn cursor off in answer mode
-
                     extract_scribble_page();
 
-                    // Remove all the spaces at the end
+                    if(extracted[20] == '@'){
 
-                    for (int i = strlen(extracted) - 1; i >= 0; i--) {
-                        if (extracted[i] == ' ') {
-                            extracted[i] = '\0';   
-                        } else {
-                            break; 
+                        // User wants to view a HTML file @ a specific IPv4 / locally or wants to enter game mode
+
+                        if (strncmp(&extracted[21], "esp", 3) == 0){
+
+                            // Look at Local file
+
+                            clear_display();
+
+                            UI_mode = 'h';
+
+                            // Go to text passage 0 everywhere
+
+                            for (int i = 0; i <= 8; i++){
+
+                                html_menu[i] = 0;
+                            }
+
+                            html_text_passage = 0;
+
+                            setcursor(0,1);
+
+                            display_from_local_html(html_menu, html_text_passage, current_html_text,cursor);
+
+                            ESP_LOGI("HTML","%s",current_html_text);
+
                         }
+
+                        else if (strncmp(&extracted[21], "game", 4) == 0){
+
+                            // Enter game mode
+                        }
+
+                        else{
+
+                            // Download html file from local server
+
+                            // Check: does server exist?
+
+                            strcpy(url, "http://192.168.");
+                            char url_ending[16]; 
+
+                            memcpy(url_ending, &extracted[21], 15);
+                            url_ending[15] = '\0';
+
+                            strcat(url,url_ending);
+
+                            if (check_for_http_server(url)){
+
+                                ESP_LOGI("Success","Connected to HTTP :)");
+
+                                // Reset Scribble page, clear display
+
+                                for (int i = (scribble_page_length-1); i>=20; i--){
+                                    scribble_page[i] = 0x20;
+                                }
+                                extracted[scribble_page_length] = '\0';
+
+                                clear_display();
+
+                                // Enter HTML Mode
+
+                                UI_mode = 'h';
+                                
+                                // Go to text passage 0 everywhere
+
+                                for (int i = 0; i <= 8; i++){
+
+                                    html_menu[i] = 0;
+                                }
+
+                                html_text_passage = 0;
+
+                                setcursor(0,1);
+
+                                // Important: Save entire Text into LittleFS file system once
+                                // -> no internet communication necessary later! (save power)
+
+                                read_from_http(url);
+
+                                // Display first section
+
+                                display_from_local_html(html_menu, html_text_passage, current_html_text,cursor);
+
+                                // Debugging
+
+                                ESP_LOGI("HTML","%s",current_html_text);
+                                
+                            }
+
+                        }
+
                     }
 
-                    // Add prompt engineering suffix to make sure all the answers are not to
-                    // long and contain only valid ASCII signs
+                    else{
 
-                    strncat(extracted, answer_instructions, sizeof(extracted) - strlen(extracted) - 1);
+                        // User typed in a ChatGPT Prompt
 
-                    // Put the answer of ChatGpt into the answer page, ignore the first 20 signs in extracted (header)
+                        UI_mode = 'a';   // set UI_mode to a -> change into answer mode after completing this iteration
+                                         // of handle_keyregister_scribble
 
-                    strncpy(answer_page, handle_openai_chat(extracted + 20), answer_page_length);
-                    answer_page[answer_page_length] = '\0'; 
+                        current_page_answer = 0;
+                
+                        setcursor(0,1);   // turn cursor off in answer mode
 
-                    // reset extracted
+                        // Remove all the spaces at the end of scribble page
 
-                    for (int i = (scribble_page_length-1); i>=0; i--){
-                        extracted[i] = '0';
+                        for (int i = strlen(extracted) - 1; i >= 0; i--) {
+                            if (extracted[i] == ' ') {
+                                extracted[i] = '\0';   
+                            } else {
+                                break; 
+                            }
+                        }
+
+                        // Add prompt engineering suffix to make sure all the answers are not to
+                        // long and contain only valid ASCII signs
+
+                        strncat(extracted, answer_instructions, sizeof(extracted) - strlen(extracted) - 1);
+
+                        // Put the answer of ChatGpt into the answer page, ignore the first 20 signs in extracted (header)
+
+                        strncpy(answer_page, handle_openai_chat(extracted + 20), answer_page_length);
+                        answer_page[answer_page_length] = '\0'; 
+
+                        // reset extracted
+
+                        for (int i = (scribble_page_length-1); i>=0; i--){
+                            extracted[i] = '0';
+                        }
+
+                        // reset scribble_page, leave the header of the page
+
+                        for (int i = (scribble_page_length-1); i>=20; i--){
+                            scribble_page[i] = 0x20;
+                        }
+                        extracted[scribble_page_length] = '\0';
+
                     }
-
-                    // reset scribble_page, leave the header of the page
-
-                    for (int i = (scribble_page_length-1); i>=20; i--){
-                        scribble_page[i] = 0x20;
-                    }
-                    extracted[scribble_page_length] = '\0';
 
                 }
 
@@ -1243,9 +1433,22 @@ void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpoi
                         extracted[i] = '0';
                     }
 
+                    // Print success screen
+
+                    clear_display();
+                    setcursor(0,1);
+
+                    print_line("   API Key saved   ",1,cursor);
+                    print_line("   to the device   ",2,cursor);
+                    vTaskDelay(pdMS_TO_TICKS(2000));
+
+                    setcursor(1,1);
+                    
                     // Change scribble header back to command mode
 
                     insert_scribble_header('c');
+                    print_scribble_page();
+                    initialize_cursor(cursor);
 
                     // Leave the menu again (set default values again)
 
@@ -1338,6 +1541,18 @@ void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpoi
                         extracted[i] = '0';
                     }
 
+
+                    // Print success screen
+
+                    clear_display();
+                    setcursor(0,1);
+
+                    print_line("   New Wifi saved  ",1,cursor);
+                    print_line("   to the device   ",2,cursor);
+                    vTaskDelay(pdMS_TO_TICKS(2000));
+
+                    setcursor(1,1);
+
                     // Change scribble header back to command mode
 
                     insert_scribble_header('c');
@@ -1350,6 +1565,7 @@ void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpoi
                     memset(proposed_pass, 0, sizeof(proposed_pass));
 
                     print_scribble_page();
+                    initialize_cursor(cursor);
                     
 
                 }
@@ -1390,6 +1606,17 @@ void handle_key_register_scribble(uint8_t* registerpointer, uint8_t* registerpoi
                 }
 
                 else if (menu.main_menu == true){
+
+                    // Go back to prompt mode
+
+                    clear_display();
+                    setcursor(0,1);
+
+                    print_line("  Operation aborted ",1,cursor);
+                    print_line("  by user           ",2,cursor);
+
+                    clear_display();
+                    setcursor(1,0);
 
                     menu = (Menu){'s',false,0,0,0};
                     initialize_cursor(cursor);
@@ -1452,7 +1679,7 @@ void handle_keyregister_answer(uint8_t* registerpointer, uint8_t* registerpointe
 
             // Turn the device off
 
-            shutdown();
+            device_shutdown(*cursor);
             return;    // do not print the answer_page while the shutdown is performed  
 
         }
@@ -1516,6 +1743,8 @@ void handle_keyregister_menu(uint8_t* registerpointer, uint8_t* registerpointer_
 
         if (UI_mode == 's'){
 
+            // Go back to scribble page
+
             setcursor(1,1);
             print_scribble_page();
             initialize_cursor(cursor);
@@ -1523,8 +1752,20 @@ void handle_keyregister_menu(uint8_t* registerpointer, uint8_t* registerpointer_
         }
         else if (UI_mode == 'a'){
 
+            // Go back to answer page
+
             current_page_answer = 0;
             setcursor(0,1);
+
+        }
+
+        else if (UI_mode == 'h'){
+
+            // Back to HTML viewer
+
+            setcursor(0,1);
+            clear_display();
+            display_from_local_html(html_menu, html_text_passage, current_html_text,cursor);
 
         }
     }
@@ -1535,7 +1776,7 @@ void handle_keyregister_menu(uint8_t* registerpointer, uint8_t* registerpointer_
 
             // Turn the device off
 
-            shutdown();
+            device_shutdown(*cursor);
             return;    // do not print the answer_page while the shutdown is performed  
 
         }
@@ -1548,7 +1789,7 @@ void handle_keyregister_menu(uint8_t* registerpointer, uint8_t* registerpointer_
 
         if (menu.sub_menu == 0){
             
-            menu.sub_menu = cursor->y + 1;
+            menu.sub_menu = (cursor->y + 1) + (menu.page * 4);
 
             // refresh the menu restrictions
             // leave menu mode if neccesary
@@ -1561,6 +1802,47 @@ void handle_keyregister_menu(uint8_t* registerpointer, uint8_t* registerpointer_
             else if (menu.sub_menu == 3){
                 menu_pages = menu_pages_models;
                 sub_menu_count = sub_menu_count_models;
+            }
+            else if (menu.sub_menu == 4){
+                menu_pages = menu_pages_keypad;
+                sub_menu_count = sub_menu_count_keypad;
+            }
+            else if (menu.sub_menu == 5){
+                menu_pages = menu_pages_autooff;
+                sub_menu_count = sub_menu_count_autooff;
+            }
+            else if (menu.sub_menu == 6){
+                
+                // Special case: First display a little warning:
+
+                clear_display();
+                setcursor(0,1);
+
+                print_line("Resetting the device",0,cursor);
+                print_line("will delete ALL user",1,cursor);
+                print_line("information from the",2,cursor);
+                print_line("device IRREVERSIBLY ",3,cursor);
+
+                vTaskDelay(pdMS_TO_TICKS(5000));
+                setcursor(1,0);
+
+                clear_display();
+
+                menu_pages = menu_pages_reset;
+                sub_menu_count = sub_menu_count_reset;
+            }
+            else if (menu.sub_menu == 7){
+                
+                // Special case: Only show the firmware version, return to main menu
+
+                print_firmware_info(*cursor);
+
+                menu.sub_menu = 0;
+                menu.page = 0;
+                menu_pages = menu_pages_main;
+                sub_menu_count = sub_menu_count_main;
+                cursor->y = 0;
+
             }
             else if (menu.sub_menu == 2){
 
@@ -1589,6 +1871,270 @@ void handle_keyregister_menu(uint8_t* registerpointer, uint8_t* registerpointer_
             // print the menu
 
             print_menu(*cursor);
+
+            // Set cursor back to 0!
+            
+            cursor->y = 0;
+            menu.page = 0;
+
+        }
+
+        else if (menu.sub_menu == 5){
+
+            clear_display();
+            setcursor(0,1);
+
+            if (cursor->y == 0){
+                print_line(" 1 Minute           ",3,cursor);
+                settings_set_str("autooff","1");
+                autooff_mins = 1;
+            }
+            else if (cursor->y == 1){
+                print_line(" 2 Minutes          ",3,cursor);
+                settings_set_str("autooff","2");
+                autooff_mins = 2;
+            }
+            else if (cursor->y == 2){
+                print_line(" 5 Minutes          ",3,cursor);
+                settings_set_str("autooff","5");
+                autooff_mins = 5;
+            }
+            else{
+                print_line(" 15 Minutes         ",3,cursor);
+                settings_set_str("autooff","15");
+                autooff_mins = 15;
+            }
+
+            print_line(" Switched Auto off  ",0,cursor);
+            print_line(" Timer to           ",1,cursor);
+
+            vTaskDelay(pdMS_TO_TICKS(3000));
+            clear_display();
+            setcursor(1,0);
+
+            cursor->y = 0;
+            menu.sub_menu = 0;
+            menu.page = 0;
+
+            menu_pages = menu_pages_main;
+            sub_menu_count = sub_menu_count_main;
+
+            print_menu(*cursor);
+
+        }
+
+        else if ((menu.sub_menu == 4) && (menu.subsub_menu == 0)){
+
+            if (cursor->y == 0){
+
+                // start USB HID mode
+
+                setcursor(0,1);
+                clear_display();
+
+                print_line("     REBOOTING      ",1,cursor);
+                print_line("    Please Wait     ",2,cursor);
+
+                vTaskDelay(pdMS_TO_TICKS(2000));
+
+                clear_display();
+
+                toggle_usb_mode(*cursor);      // restarts the ESP32 in usb hid mode
+
+            }
+
+            else if (cursor->y == 1){
+
+                // start BLE HID mode
+
+                /*/
+                UI_mode = 'k';
+                keypad_mode = 'b';
+                setcursor(0,1);
+
+                menu.main_menu = false;
+                menu.sub_menu = 0;
+
+                clear_display();
+                print_line("Device in BLE Keypad",0,cursor);
+                print_line("mode, [Menu] = Leave",1,cursor);
+                print_line(BLE_NAME_LABELED,2,cursor);
+                print_line("State: Disconnected ",3,cursor);
+
+                /*/
+
+                clear_display();
+                setcursor(0,1);
+
+                print_line("     Error: Not     ",1,cursor);
+                print_line("   implemented yet  ",2,cursor);
+
+                vTaskDelay(pdMS_TO_TICKS(2000));
+
+                setcursor(1,0);
+
+                menu.sub_menu = 0;
+                menu.page = 0;
+                cursor->y = 0;
+                menu_pages = menu_pages_main;
+                sub_menu_count = sub_menu_count_main;
+
+                print_menu(*cursor);
+
+            }
+            else{
+
+                menu.subsub_menu = (cursor->y + 1);
+                menu.page = 0;
+
+                menu_pages = menu_pages_keypad_orient;
+                sub_menu_count = sub_menu_count_keypad_orient;
+
+                cursor->y = 0;
+                print_menu(*cursor);
+            }
+ 
+        }
+
+        else if ((menu.sub_menu == 4) && (menu.subsub_menu == 3)){
+
+            if (cursor->y == 0){
+
+                keypad_orient = 'v';
+                setup_special_hid_LUT(keypad_orient);
+
+                // Print success screen
+
+                clear_display();
+                setcursor(0,1);
+
+                print_line("Switched to vertical",1,cursor);
+                print_line("    Keypad Layout   ",2,cursor);
+                vTaskDelay(pdMS_TO_TICKS(2000));
+
+                menu.subsub_menu = 0;
+                menu_pages = menu_pages_keypad;
+                sub_menu_count = sub_menu_count_keypad;
+                cursor->y = 0;
+                print_menu(*cursor);
+                setcursor(1,0);
+
+            }
+            else{
+
+                keypad_orient = 'h';
+                setup_special_hid_LUT(keypad_orient);
+
+                clear_display();
+                setcursor(0,1);
+
+                print_line(" Switched to horiz. ",1,cursor);
+                print_line("    Keypad Layout   ",2,cursor);
+                vTaskDelay(pdMS_TO_TICKS(2000));
+
+                menu.subsub_menu = 0;
+                menu_pages = menu_pages_keypad;
+                sub_menu_count = sub_menu_count_keypad;
+                cursor->y = 0;
+                print_menu(*cursor);
+                setcursor(1,0);
+
+            }
+
+        }
+
+        else if (menu.sub_menu == 3){
+
+            setcursor(0,1);
+            clear_display();
+            
+            if (cursor->y == 0){
+                settings_set_str("gpt_model", "gpt-3.5-turbo");
+                print_line("GPT-3.5-turbo       ",2,cursor);
+            }
+            else{
+                settings_set_str("gpt_model", "gpt-4o");
+                print_line("GPT-4o              ",2,cursor);
+            }
+
+            print_line("Switched model to:  ",1,cursor);
+
+            vTaskDelay(pdMS_TO_TICKS(3000));
+
+            // Back to main menu
+
+            menu.sub_menu = 0;
+            menu.page = 0;
+            cursor->y = 0;
+
+            menu_pages = menu_pages_main;
+            sub_menu_count = sub_menu_count_main;
+
+            setcursor(1,0);
+            print_menu(*cursor);
+            
+        }
+
+        else if (menu.sub_menu == 6){
+
+            if (cursor->y == 0){
+
+                // Empty WIFI List + API Key + LittleFS index.html + Autooff Timer(default) + Model Settings(default)
+
+                for (int i=0; i<=7; i++){
+                    wifi_clear_credentials(i);
+                }
+                api_save_key("");                       
+                settings_set_str("autooff","2");                    // default value
+                settings_set_str("gpt_model","gpt-4o");             // default setting
+                clear_html();
+                
+
+                clear_display();
+                setcursor(0,1);
+
+                print_line("All user information",1,cursor);
+                print_line(" has been deleted!  ",2,cursor);
+
+                vTaskDelay(pdMS_TO_TICKS(3000));
+
+                clear_display();
+                setcursor(1,0);
+
+                menu.sub_menu = 0;
+                menu.page = 0;
+                cursor->y = 0;
+
+                menu_pages = menu_pages_main;
+                sub_menu_count = sub_menu_count_main;
+
+                print_menu(*cursor);
+
+            }
+            
+            else{
+
+                clear_display();
+                setcursor(0,1);
+
+                print_line("  Operation aborted ",1,cursor);
+                print_line("  by user           ",2,cursor);
+
+                vTaskDelay(pdMS_TO_TICKS(3000));
+
+                clear_display();
+                setcursor(1,0);
+
+                menu.sub_menu = 0;
+                menu.page = 0;
+                cursor->y = 0;
+
+                menu_pages = menu_pages_main;
+                sub_menu_count = sub_menu_count_main;
+
+                print_menu(*cursor);
+
+            }
         }
 
         else if (menu.sub_menu == 1){
@@ -1623,7 +2169,485 @@ void handle_keyregister_menu(uint8_t* registerpointer, uint8_t* registerpointer_
 
     }
 
-    
+}
 
+void handle_keyregister_html_view(uint8_t* registerpointer, uint8_t* registerpointer_old, Cursor* cursor){
+
+    static uint8_t passage_selection_keys[9] = {'1','2','3','4','5','6','7','8','9'};
+
+    if(((keyset[registerpointer[0]].event_key) == ENTER)){
+
+        // Go back to scribble page
+
+        UI_mode = 's';
+
+        setcursor(1,1);
+
+        print_scribble_page();
+        initialize_cursor(cursor);
+
+    }
+
+    else if(((keyset[registerpointer[0]].event_key) == MENU)){
+
+        // Go to menu
+
+        UI_mode = 'm';
+        setcursor(1,0);
+        initialize_cursor(cursor);
+        moveCursor_menu('u',cursor);
+        menu = (Menu){'h',true,0,0,0};
+        print_menu(*cursor);
+        return;
+
+    }
+
+    else if (((keyset[registerpointer[0]].event_key) == UP) && (html_menu[html_text_passage] > 0 )){
+
+        // Scroll upwards (back)
+
+        html_menu[html_text_passage]--;
+
+        // Print text at new position
+
+        display_from_local_html(html_menu, html_text_passage, current_html_text,cursor);
+
+    }
+
+    else if (((keyset[registerpointer[0]].event_key) == DOWN) && (html_menu[html_text_passage] < max_sections_per_passage_html )){
+
+        // Scroll downwards (forward)
+
+        html_menu[html_text_passage]++;
+
+        // Print text at new position
+
+        display_from_local_html(html_menu, html_text_passage, current_html_text,cursor);
+
+    }
+
+    else if (((keyset[registerpointer[0]].event_key) == SHIFT)){
+
+        if (((keyset[registerpointer[1]].event_key) == MENU)){
+
+            // Turn the device off
+
+            device_shutdown(*cursor);
+            return;     
+
+        }
+    }
+
+    else if ((keyset[registerpointer[0]].event_key) == EVENT_NONE){
+
+        if (registerpointer[0] != 0){
+
+            // Ignore Keyereleases 
+
+            if (registerpointer[0] != registerpointer_old[0]){
+
+                // Check if one of the number keys was pressed
+
+                for (int i = 0; i <= 8; i++){
+
+                    if ((keyset[registerpointer[0]].alpha_value) == passage_selection_keys[i]){
+
+                        html_text_passage = i;
+
+                        // Print text at new location
+
+                        display_from_local_html(html_menu, html_text_passage, current_html_text,cursor);
+
+                    }
+                }
+
+            }
+        }
+
+    }
+
+}
+
+// Stealth mode variables
+
+bool stealth_shift_state = false;                                   // toggles everytime shift is pressed
+char stealth_allowed_keys[17] = {'0','1','2','3','4','5','6','7','8','9','+','-','*','/','.','a','='};
+
+char stealth_operation_line[21] = "                    ";           // only one line for operations
+uint8_t stealth_cursor = 0;                                         // 1 dimensional (only one line)
+float stealth_ans = 0.0f;
+uint8_t stealth_ans_error = 0;
+
+void print_stealth_operation_line(Cursor* cursor){
+
+    // Print out the operation line after it got updated
+
+    clear_display();
+    print_line(stealth_operation_line,0,cursor);
+    
+}
+
+void set_display_cursor(uint8_t x, uint8_t y){
+
+    // Set DDRAM Address of DOGM204 to a specific location
+
+    uint8_t print_location = 0x00;
+
+    if ((x < 20) && (y < 4)){
+
+        print_location = print_location + (0x20 * y);
+        print_location = print_location + (0x01 * x);
+
+        // Select DDRAM Address and write to it
+
+        bitBang(0,0,(print_location + 0x80));
+    }
+
+}
+
+void stealth_print_solution(Cursor cursor){
+
+    // Examines the stealth operation line,
+    // Calculates the solution if possible and prints it
+
+    char operand1[21] = {0};
+    char operand2[21] = {0};
+    char operator = 0;
+    const char *s = stealth_operation_line;
+    int i = 0, j = 0;
+    int found_operator = 0;
+
+    // Find operator and operand 1 within operation line
+
+    while (*s && !found_operator) {
+
+        if (*s == ' ') {
+            s++;
+            continue;
+        }
+
+        // Check if its a sign or an operator (negative number)
+
+        if ((*s == '+' || *s == '-' || *s == '*' || *s == '/') &&
+            i > 0) {
+
+            operator = *s;
+            found_operator = 1;
+            s++;
+            break;
+        }
+
+        if (i < (int)sizeof(operand1) - 1) {
+            operand1[i++] = *s;
+        }
+        s++;
+    }
+
+    operand1[i] = '\0';
+
+    // Everything behind the operator sign is operand2
+
+    while (*s) {
+
+        if (*s == ' ') {
+            s++;
+            continue;
+        }
+
+        if (j < (int)sizeof(operand2) - 1) {
+            operand2[j++] = *s;
+        }
+        s++;
+    }
+
+    operand2[j] = '\0';
+
+    ESP_LOGI("Calc","Operand1: %s   Operand2: %s   Operator: %c", operand1, operand2, operator);
+
+    // Strings to floats:
+
+    char *prblm;
+    char stealth_ans_string[21];
+    
+    float op_1 = strtof(operand1,&prblm);
+
+    if (operand1 == prblm){
+
+        if (operand1[0] == 'a'){
+
+            op_1 = stealth_ans;     // previous answer
+
+        }
+        else{
+
+            stealth_ans_error = 1;
+
+        }
+
+    }
+
+    float op_2 = strtof(operand2,&prblm);
+
+    if (operand2 == prblm){
+
+        if(operand2[0] == 'a'){
+
+            op_2 = stealth_ans;
+        }
+
+        else{
+
+            stealth_ans_error = 1;
+
+        }
+    }
+
+    // Make calculation, scan for errors
+
+    if (!stealth_ans_error){
+
+        switch (operator){
+
+            case '+': stealth_ans = op_1 + op_2; break;
+            case '-': stealth_ans = op_1 - op_2; break;
+            case '*': stealth_ans = op_1 * op_2; break;
+            case '/':
+                if (op_2 == 0.0f){
+                    stealth_ans_error = 1;
+                }
+                else{
+                    stealth_ans = op_1 / op_2;
+                }
+                break;
+            default: stealth_ans_error = 1;
+        }
+    }
+
+    // If no error: print the solution
+
+    char formatted_ans[21];
+
+    if (!stealth_ans_error){
+
+        snprintf(stealth_ans_string, sizeof(stealth_ans_string), "%.6g", stealth_ans);
+        snprintf(formatted_ans, sizeof(formatted_ans), "%20s", stealth_ans_string);
+
+    }
+
+    else{
+
+        strcpy(formatted_ans, "  Mathematical Error");
+    }
+
+    // Fill up answer string to 20 chars
+
+    ESP_LOGI("Result","%s",formatted_ans);
+
+
+    stealth_ans_error = 0;
+
+    // Print solution or error message
+
+    print_line(formatted_ans,3,&cursor);
+
+}
+
+
+void handle_key_register_stealth(uint8_t* registerpointer, uint8_t* registerpointer_old, Cursor* cursor){
+
+    // Stealth mode: The device imitates the original calculator interface (only basic calculations possible)
+    // To activate all the features the user has to hit a specific key combination!
+
+    if ((keyset[registerpointer[0]].event_key) == EVENT_NONE){
+
+        if (registerpointer[0] != 0){
+            
+            // Normal key has been pressed, only accept number keys or operand keys
+
+            for (int i = 0; i < 16; i++){
+
+                if ((keyset[registerpointer[0]].stealth_value == stealth_allowed_keys[i])){
+
+                    // It was a number or an operator
+
+                    stealth_operation_line[stealth_cursor] = keyset[registerpointer[0]].stealth_value;
+
+                    print_stealth_operation_line(cursor);
+
+                    if (stealth_cursor < 19){
+
+                        stealth_cursor++;
+                    }
+
+                    set_display_cursor(stealth_cursor,0);
+
+                }
+
+            }
+
+            if((keyset[registerpointer[0]].stealth_value == stealth_allowed_keys[16])){
+
+                // User wants the solution displayed
+
+                clear_display();
+                stealth_print_solution(*cursor);
+                stealth_cursor = 0;
+                strcpy(stealth_operation_line,"                    ");
+                set_display_cursor(stealth_cursor,0);
+
+            }
+
+            if (keyset[registerpointer[0]].normal_value == UNLCK1){
+
+                if (keyset[registerpointer[1]].normal_value == UNLCK2){
+
+                    // Correct unlock sequence
+                    // Initialize scribble mode
+
+                    setcursor(0,1);
+                    clear_display();
+                    print_start_screen(*cursor);
+                    UI_mode = 's';
+                    insert_scribble_header('c');
+                    print_scribble_page();
+                    initialize_cursor(cursor);
+                    setcursor(1,1);
+
+                }
+
+            }
+
+        }
+
+    }
+
+    else if (
+
+            (keyset[registerpointer[0]].event_key) == RIGHT ||
+            (keyset[registerpointer[0]].event_key) == LEFT)
+            
+            {
+                // Allow navigation in stealth mode, only within already written signs
+
+                if (((keyset[registerpointer[0]].normal_value) == 'r') && (stealth_cursor < 19) && (stealth_operation_line[stealth_cursor+2] != ' ')){
+                    stealth_cursor++;
+                }
+                else if (((keyset[registerpointer[0]].normal_value) == 'l') && (stealth_cursor > 0) && (stealth_operation_line[stealth_cursor-1] != ' ')){
+                    stealth_cursor--;
+                }
+
+                set_display_cursor(stealth_cursor,0);
+            }
+
+    else if(((keyset[registerpointer[0]].event_key) == ENTER)){
+
+        // delete all numbers and operator signs
+        // or shutdown (depending on shift_state)
+
+        if (stealth_shift_state == true){
+
+            device_shutdown(*cursor);
+        }
+
+        else{
+
+            clear_display();
+            stealth_cursor = 0;
+            set_display_cursor(stealth_cursor,0);
+            strcpy(stealth_operation_line,"                    ");
+        }
+
+    }
+
+    else if (((keyset[registerpointer[0]].event_key) == SHIFT)){
+
+        // toggle shift_state
+        stealth_shift_state = !stealth_shift_state;
+
+    }
+
+
+}
+
+void handle_keyregister_keypad(uint8_t* registerpointer, uint8_t* registerpointer_old, Cursor* cursor){
+
+    if ((keyset[registerpointer[0]].event_key) == EVENT_NONE){
+
+        if (registerpointer[0] != 0){
+
+            if (keypad_mode == 'u'){
+
+                // Normal value of key gets sent via USB HID interface
+                hid_send_char(keyset[registerpointer[0]].normal_value);
+
+            }
+            
+        }
+    }
+    else if ((keyset[registerpointer[0]].event_key) == SHIFT){
+
+        if (registerpointer[1] != 0){
+
+            if (keypad_mode == 'u'){
+
+                hid_send_char(keyset[registerpointer[1]].shift_value);
+            }
+        }
+
+    }
+    else if ((keyset[registerpointer[0]].event_key) == ALPHA){
+
+        if (registerpointer[1] != 0){
+
+            if (keypad_mode == 'u'){
+
+                hid_send_char(keyset[registerpointer[1]].alpha_value);
+            }
+        }
+    }
+    else if ((keyset[registerpointer[0]].event_key) == MENU){
+
+        if (keypad_mode == 'u'){
+
+            setcursor(0,1);
+            clear_display();
+
+            print_line("     REBOOTING      ",1,cursor);
+            print_line("    Please Wait     ",2,cursor);
+
+            vTaskDelay(pdMS_TO_TICKS(2000));
+
+            clear_display();
+
+            toggle_usb_mode(*cursor);      // restart in normal mode again!
+
+        }
+
+
+    }
+
+    else if (
+
+            (keyset[registerpointer[0]].event_key) == UP ||
+            (keyset[registerpointer[0]].event_key) == DOWN || 
+            (keyset[registerpointer[0]].event_key) == RIGHT ||
+            (keyset[registerpointer[0]].event_key) == LEFT){
+
+                hid_send_special_key(special_hid_LUT[keyset[registerpointer[0]].normal_value]);
+            }
+
+
+
+    else if ((keyset[registerpointer[0]].event_key) == ENTER){
+
+        hid_send_special_key(special_hid_LUT[keyset[registerpointer[0]].normal_value]);
+
+    }
+
+    else if ((keyset[registerpointer[0]].event_key) == BACK){
+
+        hid_send_special_key(special_hid_LUT[keyset[registerpointer[0]].normal_value]);
+
+    }
 
 }

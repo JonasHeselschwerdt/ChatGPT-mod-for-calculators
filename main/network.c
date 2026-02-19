@@ -9,6 +9,7 @@
 
 
 #include "network.h"
+#include "keyset.h"
 #include <string.h>
 #include <stdio.h>
 #include "nvs_flash.h"
@@ -20,16 +21,27 @@
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_netif.h"
-
+#include "esp_http_client.h"
+#include <stdbool.h>
 #include "config.h"
 #include "secret.h"
-
+#include "esp_littlefs.h"
 #include "OpenAI.h"
+#include <unistd.h>
 
 #include <stdlib.h>
 
+#include "tinyusb.h"
+#include "tinyusb_default_config.h"
+#include "class/hid/hid_device.h"
+#include "esp_system.h"
+
+#include "UI.h"
+
 static EventGroupHandle_t wifi_event_group;
 const int WIFI_CONNECTED_BIT = BIT0;
+
+
 
 
 
@@ -217,6 +229,47 @@ void preset_test_credentials(void) {
         ESP_LOGI("PRESET", "API-Key already exists! (len=%u)", (unsigned)strlen(api_buf));
     }
 }
+
+// Settings Namespace in NVS
+
+esp_err_t settings_get_str(const char *key, char *out, size_t out_len){
+
+    nvs_handle_t nvs;
+    esp_err_t err;
+
+    err = nvs_open(SETTINGS_NAMESPACE, NVS_READONLY, &nvs);
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    size_t required_len = out_len;
+    err = nvs_get_str(nvs, key, out, &required_len);
+
+    nvs_close(nvs);
+    return err;   // ESP_OK or ESP_ERR_NVS_NOT_FOUND
+}
+
+esp_err_t settings_set_str(const char *key, const char *value){
+
+    nvs_handle_t nvs;
+    esp_err_t err;
+
+    err = nvs_open(SETTINGS_NAMESPACE, NVS_READWRITE, &nvs);
+    if (err != ESP_OK) {
+        return err;
+    }
+
+    err = nvs_set_str(nvs, key, value);
+    if (err == ESP_OK) {
+        err = nvs_commit(nvs);  
+    }
+
+    nvs_close(nvs);
+    return err;
+}
+
+
+
 
 
 
@@ -424,6 +477,9 @@ bool wifi_is_connected(void)
 
 
 
+
+
+
 // OpenAI communication functions
 
 static char final_response[answer_page_length + 1];
@@ -493,8 +549,14 @@ static void openai_task(void *param) {
         return;
     }
 
-    chat->setModel(chat, "gpt-4o");
-    chat->setMaxTokens(chat, 200);
+    char gpt_model[32];
+
+    if (settings_get_str("gpt_model", gpt_model, sizeof(gpt_model)) != ESP_OK) {
+        strcpy(gpt_model, "gpt-4o");
+    }
+
+    chat->setModel(chat, gpt_model);
+    chat->setMaxTokens(chat, 1600);
     chat->setTemperature(chat, 0.7f);
     chat->setStop(chat, "\r");
     chat->setPresencePenalty(chat, 0);
@@ -566,3 +628,423 @@ char* handle_openai_chat(const char* user_input) {
 
     return final_response;
 }
+
+
+
+
+
+
+
+
+// HTML Viewer functions
+
+void littlefs_init(void){
+    esp_vfs_littlefs_conf_t conf = {
+        .base_path = "/littlefs",       // Path name
+        .partition_label = "littlefs",  // as specified by partition table
+        .format_if_mount_failed = true
+    };
+
+    esp_err_t ret = esp_vfs_littlefs_register(&conf);
+
+    if (ret != ESP_OK) {
+        ESP_LOGE("LFS", "LittleFS mount failed: %s",
+                 esp_err_to_name(ret));
+        return;
+    }
+
+    size_t total = 0, used = 0;
+    esp_littlefs_info("littlefs", &total, &used);
+
+    ESP_LOGI("LFS", "LittleFS mounted: %d KB total, %d KB used",
+             total / 1024, used / 1024);
+}
+
+
+bool check_for_http_server(const char* server_location)
+{
+    char url[128];
+
+    strncpy(url, server_location, sizeof(url) - 1);
+    url[sizeof(url) - 1] = '\0';
+
+    // remove spaces at the end
+    
+    int len = strlen(url);
+    while (len > 0 && url[len - 1] == ' ') {
+        url[len - 1] = '\0';
+        len--;
+    }
+
+    ESP_LOGI("Checking URL","Checked: %s",url);
+
+    esp_http_client_config_t config = {
+        .url = url,
+        .method = HTTP_METHOD_HEAD,
+        .timeout_ms = 2000,
+    };
+
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    if (client == NULL) {
+        return false;
+    }
+
+    esp_err_t err = esp_http_client_perform(client);
+
+    if (err == ESP_OK) {
+        int status = esp_http_client_get_status_code(client);
+        ESP_LOGI("HTTP Check", "HTTP status = %d", status);
+
+        esp_http_client_cleanup(client);
+        return true;
+    }
+
+    ESP_LOGW("HTTP Check", "HTTP connect failed: %s", esp_err_to_name(err));
+    esp_http_client_cleanup(client);
+    return false;
+}
+
+void read_from_http(const char *server_location){
+
+    // This function reads from the http server and saves everything locally into Flash (LitlleFS)
+
+    char url[128];
+
+    strncpy(url, server_location, sizeof(url) - 1);
+    url[sizeof(url) - 1] = '\0';
+
+    // remove spaces at the end
+    
+    int len = strlen(url);
+    while (len > 0 && url[len - 1] == ' ') {
+        url[len - 1] = '\0';
+        len--;
+    }
+
+    // Establish Http connection
+
+    esp_http_client_config_t config = {
+        .url = url,
+        .timeout_ms = 10000,
+    };
+
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    if (client == NULL) {
+        ESP_LOGE("HTTP", "Failed to init http client");
+        return;
+    }
+
+    esp_err_t err = esp_http_client_open(client, 0);
+    if (err != ESP_OK) {
+        ESP_LOGE("HTTP", "Failed to open HTTP connection: %s",
+                 esp_err_to_name(err));
+        esp_http_client_cleanup(client);
+        return;
+    }
+
+    int content_length = esp_http_client_fetch_headers(client);
+    ESP_LOGI("HTTP", "Content-Length: %d", content_length);
+
+    FILE *f = fopen("/littlefs/index.html", "w");
+    if (!f) {
+        ESP_LOGE("LFS", "Failed to open file for writing");
+        esp_http_client_close(client);
+        esp_http_client_cleanup(client);
+        return;
+    }
+
+    char buffer[512];
+    int total_written = 0;
+
+    while (1) {
+        int read_len = esp_http_client_read(client, buffer, sizeof(buffer));
+        if (read_len < 0) {
+            ESP_LOGE("HTTP", "Error while reading data");
+            break;
+        } else if (read_len == 0) {
+            // EOF
+            break;
+        }
+
+        fwrite(buffer, 1, read_len, f);
+        total_written += read_len;
+    }
+
+    fclose(f);
+    esp_http_client_close(client);
+    esp_http_client_cleanup(client);
+
+    ESP_LOGI("HTTP", "Download complete, %d bytes written to /littlefs/index.html",
+             total_written);
+
+}
+
+void display_from_local_html(uint16_t *html_menu, uint8_t html_text_passage, char *current_html_text, Cursor *cursor){
+
+    // Check if numbers make sense:
+
+    if (html_text_passage > 8 || html_menu[html_text_passage] > 1000){
+
+        strcpy(current_html_text,"Error: Text address out of bounds");
+
+        // Display and leave function
+
+        print_screen(current_html_text,cursor);
+
+        return;
+    }
+
+    FILE *f = fopen(HTML_FILE, "r");
+
+    // Check if file can be opened / exists
+
+    if (!f){
+
+        strcpy(current_html_text,"Error: No File in file system");
+
+        // Display and leave function
+
+        print_screen(current_html_text,cursor);
+
+        return;
+    }
+
+    // Each ID seperates exactly 80 chars, see Python http hosting tool
+
+    char id[32];
+    snprintf(id,sizeof(id),"<p id=\"H%d_U%d\">",(html_text_passage + 1), html_menu[html_text_passage]);
+
+    // Read chunks of the html until the id is found
+
+    char line[512];
+
+    strcpy(current_html_text,"Error: Identifier not found within HTML                                         ");
+
+    while (fgets(line, sizeof(line), f)){
+
+        char *start = strstr(line, id);
+
+        if (!start){
+
+            continue;
+        }
+
+        start += strlen(id);
+
+        char *end = strstr(start, "</p>");
+
+        if (!end) {
+
+            fclose(f);
+            strcpy(current_html_text,"Error: Identifier was not closed, formatting error");
+
+            // Display and leave function
+
+            print_screen(current_html_text,cursor);
+
+            return;
+        }
+
+        if ((end - start) != 80){
+
+            fclose(f);
+            strcpy(current_html_text,"Error: Formatting error of html");
+
+            // Display and leave function
+
+            print_screen(current_html_text,cursor);
+
+            return;
+        }
+        
+        // The following code is only possible because the http hosting tool
+        // ensures each section is exactly 80 chars long!
+
+        memcpy(current_html_text,start,80);
+        current_html_text[80] = '\0';
+
+        ESP_LOGI("HTML","Looked up HTML @H%d_U%d, found: %s",html_text_passage,html_menu[html_text_passage],current_html_text);
+
+        // Display text from html and leave function:
+
+        print_screen(current_html_text,cursor);
+
+        fclose(f);
+        return;
+
+
+    }
+
+    // The identifier is not found, close function
+
+    print_screen(current_html_text,cursor);
+    fclose(f);
+
+}
+
+void clear_html(void){
+
+    if (unlink("/littlefs/index.html") == 0) {
+        ESP_LOGI("LFS", "index.html successfully deleted");
+    } else {
+        ESP_LOGE("LFS", "Failed to delete index.html: errno=%d", errno);
+    }
+
+}
+
+
+
+
+
+
+
+
+// USB HID mode
+
+
+void toggle_usb_mode(Cursor cursor){
+
+    char boot_mode_buf[16];
+
+    settings_get_str("Boot_Mode",boot_mode_buf,sizeof(boot_mode_buf));
+
+    if (boot_mode_buf[0] != 'u'){
+        settings_set_str("Boot_Mode","u");
+    }
+    else{
+        settings_set_str("Boot_Mode","n");
+    }
+    
+    clear_display();
+    esp_restart(); 
+
+}
+
+
+static const uint8_t hid_report_descriptor[] = {
+    TUD_HID_REPORT_DESC_KEYBOARD()
+};
+
+
+static const char *hid_string_descriptor[] = {
+    (char[]){0x09, 0x04},   // 0: English (0x0409)
+    "ElectrJonics",         // 1: Manufacturer
+    "USB HID Keyboard",     // 2: Product
+    "0001",                 // 3: Serial
+    "HID Keyboard",         // 4: Interface
+};
+
+#define TUSB_DESC_TOTAL_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_DESC_LEN)
+
+static const uint8_t hid_configuration_descriptor[] = {
+    // Config number, interface count, string index, total length, attributes, power (mA)
+    TUD_CONFIG_DESCRIPTOR(1, 1, 0, TUSB_DESC_TOTAL_LEN,
+                          TUSB_DESC_CONFIG_ATT_SELF_POWERED, 100),
+
+    // Interface number, string index, boot protocol, report desc len, EP addr, EP size, interval
+    TUD_HID_DESCRIPTOR(0, 4, false,
+                       sizeof(hid_report_descriptor),
+                       0x81, 16, 10),
+};
+
+uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance)
+{
+    (void) instance;
+    return hid_report_descriptor;
+}
+
+uint16_t tud_hid_get_report_cb(uint8_t instance,
+                               uint8_t report_id,
+                               hid_report_type_t report_type,
+                               uint8_t *buffer,
+                               uint16_t reqlen)
+{
+    (void) instance;
+    (void) report_id;
+    (void) report_type;
+    (void) buffer;
+    (void) reqlen;
+    return 0;
+}
+
+void tud_hid_set_report_cb(uint8_t instance,
+                           uint8_t report_id,
+                           hid_report_type_t report_type,
+                           uint8_t const *buffer,
+                           uint16_t bufsize)
+{
+    (void) instance;
+    (void) report_id;
+    (void) report_type;
+    (void) buffer;
+    (void) bufsize;
+}
+
+static bool usb_started = false;
+
+void hid_mode_start(void)
+{
+    if (usb_started) return;
+    usb_started = true;
+
+    ESP_LOGI("USB", "Starting USB HID");
+    tinyusb_config_t tusb_cfg = TINYUSB_DEFAULT_CONFIG();
+    tusb_cfg.descriptor.device = NULL;
+    tusb_cfg.descriptor.full_speed_config = hid_configuration_descriptor;
+    tusb_cfg.descriptor.string = hid_string_descriptor;
+    tusb_cfg.descriptor.string_count = sizeof(hid_string_descriptor) / sizeof(hid_string_descriptor[0]);
+
+#if TUD_OPT_HIGH_SPEED
+    tusb_cfg.descriptor.high_speed_config = hid_configuration_descriptor;
+#endif
+
+
+    esp_err_t err = tinyusb_driver_install(&tusb_cfg);
+    if (err != ESP_OK) {
+        ESP_LOGE("USB", "TinyUSB install failed: %s",
+                 esp_err_to_name(err));
+        usb_started = false;
+    }
+}
+
+void hid_send_char(char c)
+{
+    if (!tud_mounted()) return;
+
+    if ((uint8_t)c >= 128) return;
+
+    Hid_Key key = hid_LUT[(uint8_t)c];
+    if (key.hid_address == 0) return;
+
+    uint8_t keycode[6] = { key.hid_address };
+
+    tud_hid_keyboard_report(0, key.modifier_byte, keycode);
+    vTaskDelay(pdMS_TO_TICKS(10));
+    tud_hid_keyboard_report(0, 0, NULL);
+}
+
+void hid_send_special_key(Special_Hid_Key key){
+
+    if (!tud_mounted()) return;
+    if (key.hid_address == 0) return;
+
+    uint8_t keycode[6] = { key.hid_address };
+
+    tud_hid_keyboard_report(
+        0,
+        key.modifier_byte,
+        keycode
+    );
+
+    vTaskDelay(pdMS_TO_TICKS(10));
+
+    // Key release
+    tud_hid_keyboard_report(0, 0, NULL);
+
+
+}
+
+
+
+
+
