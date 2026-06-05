@@ -57,6 +57,10 @@ Initial version:
 - Membrane keypad controlled by GPIO expander
 - 20x4 text LCD (no backlight)
 
+## Version 1.0.1 (Hotfix)
+
+- Fixed 'deadlock' issue of battery protection (see battery_prot_hotfix_v1_0_1.md)
+
 # Future plans for the device (To-Do List)
 
 - Adding a Data Logging mode for different sensors (with .csv export via WIFI)
