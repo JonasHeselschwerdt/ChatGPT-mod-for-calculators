@@ -41,7 +41,7 @@ Initial version:
 - Up to 9 different text sections (each up to 80.000 ASCII chars)
 - Automatic formatting (removing non-ASCII signs, removing formatting signs (\\n, \\t, etc.))
 
-# Changelog - Mainboard
+# Changelog - Hardware
 
 ## Version 1.0.0
 
@@ -61,23 +61,31 @@ Initial version:
 
 - Fixed 'deadlock' issue of battery protection (see battery_prot_hotfix_v1_0_1.md)
 
+## Version 2.0.0
+
+- Split electronics into Mainboard and UI-Board, connected by 24 Pin FPC connector
+- Battery and USB-C connector connected via Molex Picoblade Connectors (instead of soldered on)
+- Replaced programming pads with a SMD low profile DIP switch
+- Made bypassing the on-board battery protection easier (see v.1.0.1)
+- Improved ESD-Protection of USB-Connector
+- Added fuel gauge IC to monitor battery charge state via I2C
+- Added a switch to manually turn of the main 3.3V rail
+- Added an interface for a OV5640 camera module including power supply and clock source
+- Switched 20x4 text LCD interface to I2C
+- Improved power latch circuit
+- Rerouted output signals of BMS to TCA8418 inputs
+- Added an user extension interface offering up to 10 free GPIOs + I2C
+- Added a second graphic display (128x64 OLED screen)
+- Reactivated the 4 previously missing buttons
+- Added testpoints and solder jumpers for easy modifications/testing
+- Improved keypad button footprints
+- Added on-board LED for use during debugging (disconnected by default)
+- Added support for an external NTC-Thermistor for battery temperature monitoring
+
+
 # Future plans for the device (To-Do List)
 
-- Adding a Data Logging mode for different sensors (with .csv export via WIFI)
-- Adding a Bluetooth Low Energy (BLE) HID Keyboard mode
-- Adding Camera Support
-- Rerouting the USB Jack to where the battery holder used to be
-- Switching from Mikro USB to USB-C
-- Improving the ESD protection with bidirectional TVS diodes
-- Adding JST connectors to the PCB to connect peripherals
-- Reactivating the 4 non-operational buttons of the keypad
+- Cleaning up code
+- Adding the camera into the UI
+- Adding the side display into the UI
 - Changing the key mapping to be more similar to normal PC keyboards
-- Replacing the programming pads with small SMD dip switch
-- Adapting the PCB so the Battery protection can be bypassed
-  (only if battery already has a built-in battery protection)
-- Adding the possibility to use an external thermistor on the PCB
-  (if the battery does not have it built in)
-- Creating a 3D Model for a slightly thicker backcase
-  so the electronics fit in better
-- Switching from a 4bit parallel interface to I2C for display
-  communication to free up GPIOs
