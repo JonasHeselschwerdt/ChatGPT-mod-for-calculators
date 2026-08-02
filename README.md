@@ -17,7 +17,7 @@ Of course I am open to suggestions and collaborations!
 
 Youtube: @ElectrJonics
 
-Instagram: @jonas.hes04
+Instagram: @electrjonics
 
 
 © 2026 Jonas Heselschwerdt
