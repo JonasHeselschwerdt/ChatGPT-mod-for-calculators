@@ -12,22 +12,11 @@ UI.h: UI-Settings, Variable Types, extern Variables and Functions
 #ifndef UI_H
 #define UI_H
 
-
-
-
-
-
 // Includes
 
-#include "driver/i2c_master.h"
+#include "AI_calc_maindisplay.h"
 
-
-
-// Display dimension defines
-
-#define MAIN_DISPLAY_ROWS 4
-#define MAIN_DISPLAY_COLUMNS 20
-
+#include <stdint.h>
 
 
 
@@ -46,7 +35,7 @@ UI.h: UI-Settings, Variable Types, extern Variables and Functions
 
 // UI-Task Defines
 
-#define UI_LOOP_DELAYTIME 10        // in ms
+#define UI_LOOP_DELAYTIME 20        // in ms
 #define UI_LOOPS_PER_MIN ((1000 / UI_LOOP_DELAYTIME) * 60)
 
 
@@ -69,6 +58,18 @@ UI.h: UI-Settings, Variable Types, extern Variables and Functions
 
 
 // Type-Definitions
+
+typedef enum{
+    UI_MODE_SCRIBBLE,
+    UI_MODE_ANSWER,
+    UI_MODE_MENU,
+    UI_MODE_FILEVIEW
+}UI_mode_TypeDef;
+
+typedef struct{
+    uint8_t autooff_tresh_mins;
+    UI_mode_TypeDef UI_mode;
+}UI_TypeDef;
 
 typedef struct{
     char scribble_page[SCRIBBLE_PAGE_LENGTH + 1];           // +1 for String-terminator
@@ -93,7 +94,7 @@ typedef struct{
 
 typedef struct{
 
-} html_mode_typeDef;
+} fileview_mode_typeDef;
 
 
 
@@ -101,19 +102,13 @@ typedef struct{
 
 // Extern global Variables
 
-extern i2c_master_bus_handle_t i2c_bus;
-extern char UI_mode;
-
+extern UI_TypeDef UI;
 
 
 
 
 // Exported functions
 
-void i2c_bus_init(void);
-void gpios_init(void);
-void gpios_set_default(void);
-void free_gpios_init(void);
 
 
 

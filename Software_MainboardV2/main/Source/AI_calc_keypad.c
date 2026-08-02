@@ -14,10 +14,12 @@ keypad.c: Functions and variables to implement the TCA8418 via I2C
 #include "driver/i2c_master.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
+#include "esp_err.h"
 #include "freertos/FreeRTOS.h"
 #include "esp_timer.h"
 
 #include "AI_calc_main.h"
+#include "AI_calc_device.h"
 #include "AI_calc_UI.h"
 #include "AI_calc_keypad.h"
 
@@ -53,8 +55,8 @@ Key_TypeDef cur_pressed_keys[10];
 
 // Static Function declarations
 
-static esp_err_t tca8418_write(uint8_t reg, uint8_t data);
-static esp_err_t tca8418_read(uint8_t reg, uint8_t *data);
+static void tca8418_write(uint8_t reg, uint8_t data);
+static void tca8418_read(uint8_t reg, uint8_t *data);
 static void tca8418_gpio_set_mode(tca_gpio_TypeDef* gpio);
 static void initialize_KeyLUT(void);
 static void tca8418_get_key_FIFO(uint8_t* keypad_FIFO);
@@ -67,6 +69,18 @@ static uint8_t compare_keys(Key_TypeDef *key1, Key_TypeDef *key2);
 // TCA8418 related static functions
 
 
+static void tca8418_write(uint8_t reg, uint8_t data) {
+
+    uint8_t buf[2] = { reg, data };
+    ESP_ERROR_CHECK(i2c_master_transmit(tca8418_dev, buf, sizeof(buf), -1));
+}
+
+static void tca8418_read(uint8_t reg, uint8_t *data) {
+
+    ESP_ERROR_CHECK(i2c_master_transmit(tca8418_dev, &reg, 1, -1));
+    ESP_ERROR_CHECK(i2c_master_receive(tca8418_dev, data, 1, -1));
+}
+
 static void tca8418_gpio_set_mode(tca_gpio_TypeDef* gpio){
 
     if (gpio->gpio_bitmask >> 15){
@@ -74,34 +88,19 @@ static void tca8418_gpio_set_mode(tca_gpio_TypeDef* gpio){
         gpio->gpio_bitmask &= 0x7FFF;
         if (gpio->gpio_bitmask > 0x0080){
             gpio->gpio_bitmask >>= 8;
-            ESP_ERROR_CHECK(tca8418_write(TCA_GPIO_DIR3_REG,(gpio->gpio_bitmask & gpio->gpio_mode)));
-            ESP_ERROR_CHECK(tca8418_write(TCA_GPIO_PULL3_REG,(gpio->gpio_bitmask & gpio->gpio_pullup_en)));
+            tca8418_write(TCA_GPIO_DIR3_REG,(gpio->gpio_bitmask & gpio->gpio_mode));
+            tca8418_write(TCA_GPIO_PULL3_REG,(gpio->gpio_bitmask & gpio->gpio_pullup_en));
         }
         else{
-            ESP_ERROR_CHECK(tca8418_write(TCA_GPIO_DIR2_REG,(gpio->gpio_bitmask & gpio->gpio_mode)));
-            ESP_ERROR_CHECK(tca8418_write(TCA_GPIO_PULL2_REG,(gpio->gpio_bitmask & gpio->gpio_pullup_en)));
+            tca8418_write(TCA_GPIO_DIR2_REG,(gpio->gpio_bitmask & gpio->gpio_mode));
+            tca8418_write(TCA_GPIO_PULL2_REG,(gpio->gpio_bitmask & gpio->gpio_pullup_en));
         }
     }
     else{
         // Row Bitmask
-        ESP_ERROR_CHECK(tca8418_write(TCA_GPIO_DIR1_REG,(gpio->gpio_bitmask & gpio->gpio_mode)));
-        ESP_ERROR_CHECK(tca8418_write(TCA_GPIO_PULL1_REG,(gpio->gpio_bitmask & gpio->gpio_pullup_en)));
+        tca8418_write(TCA_GPIO_DIR1_REG,(gpio->gpio_bitmask & gpio->gpio_mode));
+        tca8418_write(TCA_GPIO_PULL1_REG,(gpio->gpio_bitmask & gpio->gpio_pullup_en));
     }
-}
-
-static esp_err_t tca8418_write(uint8_t reg, uint8_t data) {
-
-    uint8_t buf[2] = { reg, data };
-    return i2c_master_transmit(tca8418_dev, buf, sizeof(buf), -1);
-}
-
-static esp_err_t tca8418_read(uint8_t reg, uint8_t *data) {
-
-    esp_err_t ret = i2c_master_transmit(tca8418_dev, &reg, 1, -1);
-    if (ret != ESP_OK){
-        return ret;
-    }
-    return i2c_master_receive(tca8418_dev, data, 1, -1);
 }
 
 static void tca8418_get_key_FIFO(uint8_t* keypad_FIFO){
@@ -111,22 +110,20 @@ static void tca8418_get_key_FIFO(uint8_t* keypad_FIFO){
         keypad_FIFO[i] = 0;
     }
     uint8_t interrupt;
-    if (tca8418_read(TCA_INT_STAT_REG,&interrupt) == ESP_OK){
-        if (interrupt & 0x01){
-            // Interrupt source = Keypad
-            uint8_t event_counter;
-            if (tca8418_read(TCA_KEY_LCK_EC_REG,&event_counter) == ESP_OK){
-                event_counter &= 0x0F;
-                uint8_t key_event;
-                for (uint8_t i = 0; i < event_counter && i < 10; i++){
-                    if (tca8418_read(TCA_KEY_EVENT_A_REG, &key_event) == ESP_OK){
-                        keypad_FIFO[i] = key_event;
-                    }
-                }
-                ESP_ERROR_CHECK(tca8418_write(TCA_INT_STAT_REG,0x01));   // To Clear interrupt
-            }
+    tca8418_read(TCA_INT_STAT_REG,&interrupt);
+    if (interrupt & 0x01){
+        // Interrupt source = Keypad
+        uint8_t event_counter;
+        tca8418_read(TCA_KEY_LCK_EC_REG,&event_counter);
+        event_counter &= 0x0F;
+        uint8_t key_event;
+        for (uint8_t i = 0; i < event_counter && i < 10; i++){
+            tca8418_read(TCA_KEY_EVENT_A_REG, &key_event);
+            keypad_FIFO[i] = key_event;
         }
+        tca8418_write(TCA_INT_STAT_REG,0x01);   // To Clear interrupt
     }
+    
 }
 
 static void initialize_KeyLUT(void){
@@ -225,15 +222,15 @@ void tca8418_init_keypad(void){
     gpio_set_level(TCA8418_N_RESET,1);
     vTaskDelay(pdMS_TO_TICKS(10));
 
-    ESP_ERROR_CHECK(tca8418_write(TCA_CFG_REG,0x01));
+    tca8418_write(TCA_CFG_REG,0x01);
     // Keypad Setup
-    ESP_ERROR_CHECK(tca8418_write(TCA_KP_GPIO1_REG,rows));
-    ESP_ERROR_CHECK(tca8418_write(TCA_KP_GPIO2_REG,(uint8_t)columns));
-    ESP_ERROR_CHECK(tca8418_write(TCA_KP_GPIO3_REG,(uint8_t)(columns >> 8)));
+    tca8418_write(TCA_KP_GPIO1_REG,rows);
+    tca8418_write(TCA_KP_GPIO2_REG,(uint8_t)columns);
+    tca8418_write(TCA_KP_GPIO3_REG,(uint8_t)(columns >> 8));
     // All Pins not configured as Keypad Pins -> Input GPIO
     // Not configured as interrupt source, not part of event FIFO (default behaviour)
     // GPIs read via polling
-    ESP_ERROR_CHECK(tca8418_write(TCA_KEY_LCK_EC_REG,0x00));         // Always unlock Keypad (lock feature not used)
+    tca8418_write(TCA_KEY_LCK_EC_REG,0x00);         // Always unlock Keypad (lock feature not used)
 
     initialize_KeyLUT();
 }
@@ -256,7 +253,7 @@ uint8_t tca8418_gpi_get_level(uint16_t gpi_bitmask){
         // Row Bitmask
         tca8418_read(TCA_DATA_STAT1_REG,&gpi_state);
     }
-    return (gpi_state & gpi_bitmask);
+    return ((gpi_state & gpi_bitmask)!=0);
 }
 
 void tca8418_gpo_set_level(uint16_t gpo_bitmask, uint8_t output_level){
@@ -265,15 +262,15 @@ void tca8418_gpo_set_level(uint16_t gpo_bitmask, uint8_t output_level){
         // Column bitmask
         gpo_bitmask &= 0x7FFF;
         if (gpo_bitmask > 0x0080){
-            ESP_ERROR_CHECK(tca8418_write(TCA_DATA_OUT3_REG,(gpo_bitmask & output_level)));
+            tca8418_write(TCA_DATA_OUT3_REG,(gpo_bitmask & output_level));
         }
         else{
-            ESP_ERROR_CHECK(tca8418_write(TCA_DATA_OUT2_REG,(gpo_bitmask & output_level)));
+            tca8418_write(TCA_DATA_OUT2_REG,(gpo_bitmask & output_level));
         }
     }
     else{
         //Row bitmask
-        ESP_ERROR_CHECK(tca8418_write(TCA_DATA_OUT1_REG,(gpo_bitmask & output_level)));
+        tca8418_write(TCA_DATA_OUT1_REG,(gpo_bitmask & output_level));
     }
 }
 

@@ -173,9 +173,7 @@ typedef struct{
 // Original Calculator Key to altered Keypad Layout translation
 
 typedef enum{
-
     // All possible special functions on the altered keypad 
-    
     KEY_NOT_DEFINED,
     KEY_NO_SPECIAL_FUNC,
     KEY_SHIFT_SPECIAL_FUNC,
@@ -188,13 +186,10 @@ typedef enum{
     KEY_BACK_SPECIAL_FUNC,
     KEY_ENTER_SPECIAL_FUNC,
     KEY_CAMERA_SPECIAL_FUNC
-
 } KeySpecialFunc_TypeDef;
 
 typedef struct{
-
     // Properties of an altered key
-
     KeySpecialFunc_TypeDef special_function;
     char normal_meaning;
     char shift_meaning;
@@ -202,7 +197,6 @@ typedef struct{
     char calculatormode_meaning;
     uint8_t USB_meaning;
     uint64_t press_timestamp;
-
 } Key_TypeDef;
 
 
@@ -220,8 +214,10 @@ extern Key_TypeDef cur_pressed_keys[10];
 
 void tca8418_init_keypad(void);
 void tca8418_init_gpios(void);
+
 uint8_t tca8418_gpi_get_level(uint16_t gpi_bitmask);
 void tca8418_gpo_set_level(uint16_t gpo_bitmask, uint8_t output_level);
+
 void update_pressed_keys(void);
 
 
