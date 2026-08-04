@@ -38,35 +38,32 @@ void app_main(void){
         // Debuggincode start Display
         char* debug_text[MAIN_DISPLAY_ROWS]={
             "                    ",
-            "  Running Display   ",
-            "  Test Software     ",
+            SOFTWARE_VERSION_STRING,
+            DEVICE_STATUS_STRING,
             "                    "    
         };
-        dogm204_print_screen(debug_text);       // Will work
-        debug_text[1] = "This string is intentionally way to long";
-        vTaskDelay(pdMS_TO_TICKS(2000));
-        dogm204_print_screen(debug_text);       // To long error
-        vTaskDelay(pdMS_TO_TICKS(2000));
-        debug_text[1] = "str to short";
-        dogm204_print_screen(debug_text);       // To short error
-        vTaskDelay(pdMS_TO_TICKS(2000));
-        char line0[] = "====================";
-        char line1[] = "     This is an     ";
-        char line2[] = "  important message ";
-        char line3[] = "====================";
-        char *debug_message[MAIN_DISPLAY_ROWS] = {
-            line0,
-            line1,
-            line2,
-            line3
-        };
-        dogm204_print_message(debug_message,2);
-        vTaskDelay(pdMS_TO_TICKS(2000));
-        dogm204_start_loading_screen(" Waiting...         ");
-        vTaskDelay(pdMS_TO_TICKS(10000));
-        dogm204_end_loading_screen();
-        debug_text[1]="  Running Keypad    ";
         dogm204_print_screen(debug_text);
+        vTaskDelay(pdMS_TO_TICKS(2000));
+        char *debug_message[MAIN_DISPLAY_ROWS] = {
+            "====================",
+            "    Created by      ",
+            " @ElectrJonics on YT",
+            "===================="
+        };
+        dogm204_print_message(debug_message,2000);
+        vTaskDelay(pdMS_TO_TICKS(2000));
+        dogm204_start_loading_screen(" Loading...         ", 150);
+        vTaskDelay(pdMS_TO_TICKS(5000));
+        dogm204_end_loading_screen();
+        dogm204_print_screen(debug_text);       
+        vTaskDelay(pdMS_TO_TICKS(2000));
+        char* fancy_text[MAIN_DISPLAY_ROWS]={
+            EMPTY_LINE,
+            "  This is a fancy   ",
+            " swiping animation  ",
+            EMPTY_LINE
+        };
+        dogm204_print_screen_fancy(fancy_text,3000);
         // Debuggingcode start Keypad
         while(1){
             if(!gpio_get_level(TCA8418_N_INTERRUPT)){

@@ -30,10 +30,12 @@ device.c: Battery management, GPIO, I2C, and connectivity excluding wifi
 i2c_master_bus_handle_t i2c_bus = NULL;
 
 device_TypeDef device = {
+    // default values
     .debug_mode = 1,
-    .main_display_contrast = 50,        // default value
+    .main_display_contrast = 50,        
     .bms_cell_millivolts = 3700,
-    .bms_cell_temp = 20
+    .bms_cell_temp = 20,
+    .bms_battery_percentage = 100
 };
 
 

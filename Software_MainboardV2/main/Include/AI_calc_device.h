@@ -27,6 +27,7 @@ typedef struct{
     uint8_t main_display_contrast;
     uint16_t bms_cell_millivolts;
     uint8_t bms_cell_temp;
+    uint8_t bms_battery_percentage;
 }device_TypeDef;
 
 

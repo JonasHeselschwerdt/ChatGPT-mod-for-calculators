@@ -26,6 +26,15 @@ maindisplay.h: Settings for main display (text LCD)
 
 
 
+// Display restrictions
+
+#define MAIN_DISPLAY_MAX_FRAMERATE 20       // in Hz
+#define MAIN_DISPLAY_MIN_CYCLETIME_MS  ((1/MAIN_DISPLAY_MAX_FRAMERATE)*1000)
+
+
+
+
+
 // Display dimension defines
 
 #define MAIN_DISPLAY_ROWS 4             // do not set to a value lower than 2!
@@ -116,6 +125,7 @@ maindisplay.h: Settings for main display (text LCD)
 
 #define DOGM204_FULLBLOCK 0xFF
 #define DOGM204_HOLLOWBLOCK 0xFE
+#define DOGM204_HALFHOLLOWBLOCK 0xFD
 
 
 
@@ -124,14 +134,19 @@ maindisplay.h: Settings for main display (text LCD)
 // Loading screen related
 
 #define LOADING_ACTIVE_BIT BIT1
-#define LOADING_SCREEN_ADVANCE_INTERVAL_MS 300
 
 
 
 
-// Useful strings
+
+
+// Useful strings 
 
 #define EMPTY_LINE "                    "       // same length as MAIN_DISPLAY_COLUMNS
+
+
+
+
 
 // Global variables
 
@@ -142,19 +157,20 @@ maindisplay.h: Settings for main display (text LCD)
 
 // Exported functions
 
+// Initialization
 void dogm204_init(void);
-
+// Settings
 void dogm204_set_contrast(uint8_t contrast);
 void dogm204_display_control(uint8_t display_settings);
 void dogm204_set_cursor_shift_dir(uint8_t dir);
 void dogm204_set_cursor_position(uint8_t x, uint8_t y);
-
+// Print-type functions
 void dogm204_clear_screen(void);
 void dogm204_print_error_screen(char* error_message_string, char* error_source_string);
 void dogm204_print_screen(char** screen_text);
-void dogm204_print_screen_fancy(char** screen_text);
-void dogm204_print_message(char** screen_text, uint8_t display_time);
-void dogm204_start_loading_screen(char* loading_screen_string);
+void dogm204_print_screen_fancy(char** screen_text, uint16_t animation_time);
+void dogm204_print_message(char** screen_text, uint16_t display_time);
+void dogm204_start_loading_screen(char* loading_screen_string, uint16_t advance_interval);
 void dogm204_end_loading_screen(void);
 
 

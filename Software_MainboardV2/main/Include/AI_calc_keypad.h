@@ -212,12 +212,13 @@ extern Key_TypeDef cur_pressed_keys[10];
 
 // Exported functions
 
+// Init fucntions
 void tca8418_init_keypad(void);
 void tca8418_init_gpios(void);
-
+// GPIO control
 uint8_t tca8418_gpi_get_level(uint16_t gpi_bitmask);
 void tca8418_gpo_set_level(uint16_t gpo_bitmask, uint8_t output_level);
-
+// Keypad control
 void update_pressed_keys(void);
 
 
