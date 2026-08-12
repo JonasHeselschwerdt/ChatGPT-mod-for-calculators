@@ -1,6 +1,6 @@
 /*
 
-ChatGPT Hardware Hack for caluclators: Software V2
+ChatGPT Hardware Hack for calculators: Software V2
 
 © 2026 Jonas Heselschwerdt
 Licensed under CC BY-NC 4.0

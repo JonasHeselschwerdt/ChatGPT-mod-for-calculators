@@ -1,6 +1,6 @@
 /*
 
-ChatGPT Hardware Hack for caluclators: Software V2
+ChatGPT Hardware Hack for calculators: Software V2
 
 © 2026 Jonas Heselschwerdt
 Licensed under CC BY-NC 4.0
@@ -24,11 +24,8 @@ device.h: Hardware settings
 
 typedef struct{
     uint8_t debug_mode;
-    uint8_t main_display_contrast;
-    uint16_t bms_cell_millivolts;
-    uint8_t bms_cell_temp;
-    uint8_t bms_battery_percentage;
 }device_TypeDef;
+
 
 
 
@@ -44,7 +41,7 @@ extern device_TypeDef device;
 
 #define ESP_N_POWERLATCH 4
 
-#define MAIN_DISPLAY_N_RESET 8
+#define MAIN_DISPLAY_N_RESET 8  
 
 #define TCA8418_N_INTERRUPT 16
 #define TCA8418_N_RESET 17
@@ -53,13 +50,28 @@ extern device_TypeDef device;
 
 #define CAMERA_POWER_ENABLE 38
 
-#define BMS_ADC_THERM 39
+#define BMS_ADC_TEMP 3
+#define BMS_NTC_VOLTAGE_DIV_ACT 39
 
+/*
+To use GPIO 3 the Efuses need to be set correctly
+EFUSE_STRAP_JTAG_SEL = EFUSE_DIS_USB_JTAG = EFUSE_DIS_PAD_JTAG = 0
+This is the case by default, don't change these!
+*/
+ 
 #define FREEGPIO_8 40
 #define FREEGPIO_7 41
 #define FREEGPIO_6 42
 #define FREEGPIO_5 43
 #define FREEGPIO_4 44
+
+
+
+
+
+// Needed for some ADC operations
+
+#define GPIO_OUTPUT_HIGH_MV 3250        // Output high voltage of ESP32 GPIO
 
 
 
@@ -78,8 +90,11 @@ extern device_TypeDef device;
 
 // Exported functions
 
-void powerlatch_shutdown(void);
+void powerlatch_shutdown(void);                 // can only be performed after all components have been initialized
+void powerlatch_shutdown_immediately(void);     // can be performed always
 void device_init(void);
-void get_battery_info(void);
+
+
+
 
 #endif

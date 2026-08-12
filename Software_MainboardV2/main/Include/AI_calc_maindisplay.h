@@ -1,6 +1,6 @@
 /*
 
-ChatGPT Hardware Hack for caluclators: Software V2
+ChatGPT Hardware Hack for calculators: Software V2
 
 © 2026 Jonas Heselschwerdt
 Licensed under CC BY-NC 4.0
@@ -111,9 +111,9 @@ maindisplay.h: Settings for main display (text LCD)
 
 // Error codes for error printing on main display
 
-#define ERROR_SOURCE_MAIN_DISPLAY "MAIN DISPLAY ERROR  "
-#define ERROR_SOURCE_KEYPAD "KEYPAD ERROR        "
-
+#define ERROR_SOURCE_MAIN_DISPLAY   "MAIN DISPLAY ERROR  "
+#define ERROR_SOURCE_KEYPAD         "KEYPAD ERROR        "
+#define ERROR_SOURCE_BMS            "BMS ERROR           "
 
 
 
@@ -124,8 +124,11 @@ maindisplay.h: Settings for main display (text LCD)
 // This is the index in MainDisplayLUT, NOT the DOGM204 character code, do not mix up!
 
 #define DOGM204_FULLBLOCK 0xFF
-#define DOGM204_HOLLOWBLOCK 0xFE
-#define DOGM204_HALFHOLLOWBLOCK 0xFD
+#define DOGM204_HOLLOWBLOCK 0xFE        // custom
+#define DOGM204_HALFHOLLOWBLOCK 0xFD    // custom
+#define DOGM204_DEGREE_SIGN 0xFC        
+#define DOGM204_BATTERY_SIGN 0xFB       // custom
+#define DOGM204_DELTA_SIGN 0xFA
 
 
 
@@ -150,7 +153,7 @@ maindisplay.h: Settings for main display (text LCD)
 
 // Global variables
 
-
+extern uint8_t main_display_contrast;
 
 
 

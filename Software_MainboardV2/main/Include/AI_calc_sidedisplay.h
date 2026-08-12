@@ -1,6 +1,6 @@
 /*
 
-ChatGPT Hardware Hack for caluclators: Software V2
+ChatGPT Hardware Hack for calculators: Software V2
 
 © 2026 Jonas Heselschwerdt
 Licensed under CC BY-NC 4.0
@@ -19,7 +19,7 @@ sidedisplay.h: Settings for sidedisplay (OLED-graphic display)
 
 // I2C-Address
 
-#define SIDEDIS_I2C_ADDR 0x3D
+#define DEP128064_I2C_ADDR 0x3D
 
 
 

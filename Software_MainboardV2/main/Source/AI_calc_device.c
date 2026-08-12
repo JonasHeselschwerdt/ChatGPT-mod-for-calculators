@@ -1,25 +1,44 @@
 /*
 
-ChatGPT Hardware Hack for caluclators: Software V2
+ChatGPT Hardware Hack for calculators: Software V2
 
 © 2026 Jonas Heselschwerdt
 Licensed under CC BY-NC 4.0
 
-device.c: Battery management, GPIO, I2C, and connectivity excluding wifi
+device.c: GPIO, I2C, and other connectivity
 
 */
+
+
+
 
 // Includes
 
 #include "driver/i2c_master.h"
 #include "driver/gpio.h"
-#include "AI_calc_main.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 
+
+#include "AI_calc_main.h"
 #include "AI_calc_device.h"
 #include "AI_calc_maindisplay.h"
 #include "AI_calc_keypad.h"
+#include "AI_calc_battery.h"
+    
+
+
+
+
+// Static variables
+
+char* shutdown_text[MAIN_DISPLAY_ROWS] = {
+    "====================",
+    "  Device is         ",
+    "  shuting down      ",
+    "===================="
+};
+
 
 
 
@@ -31,24 +50,20 @@ i2c_master_bus_handle_t i2c_bus = NULL;
 
 device_TypeDef device = {
     // default values
-    .debug_mode = 1,
-    .main_display_contrast = 50,        
-    .bms_cell_millivolts = 3700,
-    .bms_cell_temp = 20,
-    .bms_battery_percentage = 100
+    .debug_mode = 1,        
 };
+
+
 
 
 
 
 // Static function declarations
 static void i2c_bus_init(void);
+
 static void gpios_init(void);
 static void gpios_set_default(void);
 static void free_gpios_init(void);
-static void get_battery_temp(void);
-
-
 
 
 
@@ -83,7 +98,6 @@ static void gpios_init(void){
     outputs |= (1ULL << TCA8418_N_RESET);
     outputs |= (1ULL << SIDE_DISPLAY_N_RESET);
     outputs |= (1ULL << CAMERA_POWER_ENABLE);
-
     gpio_config_t output_config = {
         .pin_bit_mask = outputs,
         .mode = GPIO_MODE_OUTPUT,
@@ -96,7 +110,6 @@ static void gpios_init(void){
 
     uint64_t inputs = 0;
     inputs |= (1ULL << TCA8418_N_INTERRUPT);
-
     gpio_config_t input_config = {
         .pin_bit_mask = inputs,
         .mode = GPIO_MODE_INPUT,
@@ -105,6 +118,17 @@ static void gpios_init(void){
         .intr_type = GPIO_INTR_DISABLE
     };
     gpio_config(&input_config);
+
+    uint64_t disabled = 0;
+    disabled |= (1ULL << BMS_NTC_VOLTAGE_DIV_ACT);
+    gpio_config_t disable_config = {
+        .pin_bit_mask = disabled,
+        .mode = GPIO_MODE_DISABLE,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE
+    };
+    gpio_config(&disable_config);
 }
 
 static void gpios_set_default(void){
@@ -142,40 +166,41 @@ static void free_gpios_init(void){
 
 
 
-// Static functions BMS
-
-static void get_battery_temp(void){
-
-}
-
-
-
-
-
-
-
 // Exported functions
 
 void powerlatch_shutdown(void){
 
+    // turns off device and informs user
+    dogm204_print_screen(shutdown_text);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    gpio_set_level(ESP_N_POWERLATCH,1);
+}
+
+void powerlatch_shutdown_immediately(void){
+
+    // turns off device immediately and without warning
     gpio_set_level(ESP_N_POWERLATCH,1);
 }
 
 void device_init(void){
 
+    // GPIOs
     gpios_init();
     free_gpios_init();
     gpios_set_default();
+    // ADC and I2C
+    bms_temp_adc_init();
     i2c_bus_init();
-
-    vTaskDelay(pdMS_TO_TICKS(100));
-
+    // Keypad and more GPIOs
     tca8418_init_keypad();
     tca8418_init_gpios();
+    // BMS
+    max17048init();
+    // Main display
     dogm204_init();
+    // Check battery condition after initializing components)
+    vTaskDelay(pdMS_TO_TICKS(100));
+    if (!battery_boot_ok()){
+        powerlatch_shutdown();
+    }
 }
-
-void get_battery_info(void){
-
-}
-

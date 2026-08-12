@@ -1,6 +1,6 @@
 /*
 
-ChatGPT Hardware Hack for caluclators: Software V2
+ChatGPT Hardware Hack for calculators: Software V2
 
 © 2026 Jonas Heselschwerdt
 Licensed under CC BY-NC 4.0
@@ -78,11 +78,11 @@ static const char animation_divider[] = {
     // Is insterted between transitions in dogm204_print_screen_fancy()
     ' ',
     ' ',
-    DOGM204_HOLLOWBLOCK,
+    ' ',
     DOGM204_HALFHOLLOWBLOCK,
     DOGM204_FULLBLOCK,
     DOGM204_HALFHOLLOWBLOCK,
-    DOGM204_HOLLOWBLOCK,
+    ' ',
     ' ',
     ' ',
     '\0'
@@ -96,6 +96,7 @@ static const char animation_divider[] = {
 
 // Global main display variables
 
+uint8_t main_display_contrast = 50;
 
 
 
@@ -161,13 +162,16 @@ static void dogm204_read_data(uint8_t* data){
 static uint8_t dogm204_screen_text_valid(char** screen_text){
 
     // Check if strings are valid (same length as MAIN_DISPLAY_COLUMNS)
+    char error_info[MAIN_DISPLAY_COLUMNS+1];
     for (uint8_t i=0; i<MAIN_DISPLAY_ROWS; i++){
         if (strlen(screen_text[i]) < MAIN_DISPLAY_COLUMNS){
-            dogm204_print_error_screen("STRING TOO SHORT    ",ERROR_SOURCE_MAIN_DISPLAY);
+            snprintf(error_info,sizeof(error_info),"LINE%3u %3uTOOSHORT ",i,(uint8_t)(MAIN_DISPLAY_COLUMNS-strlen(screen_text[i])));
+            dogm204_print_error_screen(error_info,ERROR_SOURCE_MAIN_DISPLAY);
             return 0;
         }
         if (strlen(screen_text[i]) > MAIN_DISPLAY_COLUMNS){
-            dogm204_print_error_screen("STRING TOO LONG     ",ERROR_SOURCE_MAIN_DISPLAY);
+            snprintf(error_info,sizeof(error_info),"LINE%3u %3uTOOLONG  ",i,(uint8_t)(strlen(screen_text[i])));
+            dogm204_print_error_screen(error_info,ERROR_SOURCE_MAIN_DISPLAY);
             return 0;
         }
     }
@@ -197,7 +201,6 @@ static void dogm204_read_screen(uint8_t* displaydata){
 
 static void initialize_MainDisplayLUT(void){
 
-    
     // Character to DDRAM code LUT
     for (uint16_t i=0; i<256; i++){
         MainDisplay_LUT[i] = 0x20;
@@ -301,6 +304,8 @@ static void initialize_MainDisplayLUT(void){
     MainDisplay_LUT['9'] = 0x39;
     // Other non-ASCII symbols
     MainDisplay_LUT[DOGM204_FULLBLOCK] = 0x1F;
+    MainDisplay_LUT[DOGM204_DEGREE_SIGN] = 0x80;        // using ^0 as 'degree' sign
+    MainDisplay_LUT[DOGM204_DELTA_SIGN] = 0xB0;
 }
 
 static void initialize_MainDisplayReverseLUT(void){
@@ -371,6 +376,18 @@ static void dogm204_define_custom_symbols(void){
     };
     MainDisplay_LUT[DOGM204_HALFHOLLOWBLOCK] = 0x01;
     dogm204_create_symbol(halfhollowblock_sign,MainDisplay_LUT[DOGM204_HALFHOLLOWBLOCK]);
+    uint8_t battery_sign[8] = {
+        0b00001110,                     //          0   0   0    
+        0b00011011,                     //      0   0       0   0
+        0b00010011,                     //      0           0   0
+        0b00010101,                     //      0       0       0
+        0b00011111,                     //      0   0   0   0   0
+        0b00010101,                     //      0       0       0
+        0b00011001,                     //      0   0           0
+        0b00011111                      //      0   0   0   0   0
+    };
+    MainDisplay_LUT[DOGM204_BATTERY_SIGN] = 0x02;
+    dogm204_create_symbol(battery_sign,MainDisplay_LUT[DOGM204_BATTERY_SIGN]);
 }
 
 static void dogm204_loading_screen_task_init(void){
@@ -443,7 +460,7 @@ void dogm204_init(void){
     dogm204_write_cmd(DOGM204_FUNCTION_SET|DOGM204_IS_BIT);
     dogm204_write_cmd(DOGM204_INTERNAL_OSC);
     dogm204_write_cmd(DOGM204_FOLLOWER_CONTROL);
-    dogm204_set_contrast(device.main_display_contrast);
+    dogm204_set_contrast(main_display_contrast);
     dogm204_write_cmd(DOGM204_FUNCTION_SET);
     // clear display befor turning display on, so no 'Junk data' shows up
     dogm204_clear_screen();
