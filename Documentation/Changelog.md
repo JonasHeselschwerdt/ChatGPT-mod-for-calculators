@@ -82,6 +82,15 @@ Initial version:
 - Added on-board LED for use during debugging (disconnected by default)
 - Added support for an external NTC-Thermistor for battery temperature monitoring
 
+## Version 2.0.1
+
+- Repurposed FreeGPIO9 to NTC-Voltage Divider activation Pin (FreeGPIO9 not available anymore)
+- Added Ability to monitor the battery cell temperature with the ESP32S3 ADC1 Channel 2 (GPIO 3)
+- Added a 100nF Capacitor from 3V3_Main_disable to make it less susceptible to noise
+- Added copper pours at input pins of TPS63070 and MCP73871 to decrease thermal resistance to the PCB
+- Disabled VPCC function of MCP73871 as it led to problems when the device is only powered through USB
+- More infos: fixes_v2_0_1_documentation.md
+- Replaced FPC connector link in BOM
 
 # Future plans for the device (To-Do List)
 
