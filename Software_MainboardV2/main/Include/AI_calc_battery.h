@@ -89,7 +89,6 @@ extern bms_typeDef bms;
 #define BMS_LOW_BAT_SOC_BOOT_INHIBIT 5      // in %, below this SoC the device will not boot up
 #define BMS_LOW_BAT_V_BOOT_INHIBIT 3500     // below this Vbat in mV the device will not boot up
 
-#define BMS_LOW_BAT_THR 15                  // in %, below this SoC a warning will be shown
 #define BMS_HIGH_TEMP_SHUTDOWN 50000        // in m°C, above this cell temp the device shut down
 #define BMS_LOW_BAT_SOC_SHUTDOWN 5          // in %, below this SoC the device shuts down
 

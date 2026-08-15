@@ -25,6 +25,7 @@ device.c: GPIO, I2C, and other connectivity
 #include "AI_calc_maindisplay.h"
 #include "AI_calc_keypad.h"
 #include "AI_calc_battery.h"
+#include "AI_calc_sidedisplay.h"
     
 
 
@@ -48,10 +49,7 @@ char* shutdown_text[MAIN_DISPLAY_ROWS] = {
 
 i2c_master_bus_handle_t i2c_bus = NULL;
 
-device_TypeDef device = {
-    // default values
-    .debug_mode = 1,        
-};
+device_TypeDef device;
 
 
 
@@ -65,6 +63,8 @@ static void gpios_init(void);
 static void gpios_set_default(void);
 static void free_gpios_init(void);
 
+static void nvs_get_device_infos(void);
+static void nvs_save_device_infos(void);
 
 
 
@@ -161,6 +161,24 @@ static void free_gpios_init(void){
     gpio_config(&freegpio_config);
 }
 
+static void nvs_get_device_infos(void){
+
+    // Called during init sequence
+    // NVS not implemented yet
+    device.debug_mode = 1;
+    device.main_display_contrast = 50;
+    device.side_display_contrast = 200;
+    device.side_display_on = 1;
+    device.side_display_toggle_mode = 0;
+}
+
+static void nvs_save_device_infos(void){
+
+    // Save infos about device into NVS
+    // Called upon shutdown
+    // NVS not implemented yet
+}
+
 
 
 
@@ -191,6 +209,9 @@ void device_init(void){
     // ADC and I2C
     bms_temp_adc_init();
     i2c_bus_init();
+    // Get device informations from NVS
+    // before peripherals are initialized
+    nvs_get_device_infos();
     // Keypad and more GPIOs
     tca8418_init_keypad();
     tca8418_init_gpios();
@@ -198,9 +219,14 @@ void device_init(void){
     max17048init();
     // Main display
     dogm204_init();
-    // Check battery condition after initializing components)
+    // Check battery condition after initializing components
+    // that don't need much power)
     vTaskDelay(pdMS_TO_TICKS(100));
     if (!battery_boot_ok()){
         powerlatch_shutdown();
     }
+    // Sidedisplay
+    dep128064_init();
+
 }
+

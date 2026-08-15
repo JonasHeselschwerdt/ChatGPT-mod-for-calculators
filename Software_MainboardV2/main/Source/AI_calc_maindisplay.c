@@ -93,17 +93,6 @@ static const char animation_divider[] = {
 
 
 
-
-// Global main display variables
-
-uint8_t main_display_contrast = 50;
-
-
-
-
-
-
-
 // Static function declarations
 
 // Base functions
@@ -460,7 +449,7 @@ void dogm204_init(void){
     dogm204_write_cmd(DOGM204_FUNCTION_SET|DOGM204_IS_BIT);
     dogm204_write_cmd(DOGM204_INTERNAL_OSC);
     dogm204_write_cmd(DOGM204_FOLLOWER_CONTROL);
-    dogm204_set_contrast(main_display_contrast);
+    dogm204_set_contrast(device.main_display_contrast);
     dogm204_write_cmd(DOGM204_FUNCTION_SET);
     // clear display befor turning display on, so no 'Junk data' shows up
     dogm204_clear_screen();
@@ -474,7 +463,6 @@ void dogm204_init(void){
     // Dual byte command end
     dogm204_write_cmd(DOGM204_FUNCTION_SET);
     // Init-Sequence end
-
     initialize_MainDisplayLUT();
     dogm204_define_custom_symbols();
     initialize_MainDisplayReverseLUT();
@@ -550,6 +538,10 @@ void dogm204_clear_screen(void){
 
 void dogm204_print_error_screen(char* error_message_string, char* error_source_string){
 
+    if (xEventGroupGetBits(loading_events) & LOADING_ACTIVE_BIT){
+        // Has higher priority than loading screen
+        dogm204_end_loading_screen();
+    }
     dogm204_write_cmd(DOGM204_FUNCTION_SET);
     dogm204_write_cmd(DOGM204_CLEAR_SCREEN);
     dogm204_set_cursor_shift_dir(DOGM204_CURSOR_RIGHT_SHIFT);
@@ -563,6 +555,11 @@ void dogm204_print_error_screen(char* error_message_string, char* error_source_s
 
 void dogm204_print_screen(char** screen_text){
 
+    if (xEventGroupGetBits(loading_events) & LOADING_ACTIVE_BIT){
+        dogm204_end_loading_screen();
+        dogm204_print_error_screen("INTERRUPTING LOADING",WARNING_SOURCE_MAIN_DISPLAY);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
     dogm204_write_cmd(DOGM204_FUNCTION_SET);
     dogm204_clear_screen();
     if (!dogm204_screen_text_valid(screen_text)){
@@ -582,6 +579,11 @@ void dogm204_print_message(char** screen_text, uint16_t display_time){
     dogm204_write_cmd(DOGM204_FUNCTION_SET);
     uint8_t current_screen_data[MAIN_DISPLAY_CHARACTERS];
     dogm204_read_screen(current_screen_data);
+    if (xEventGroupGetBits(loading_events) & LOADING_ACTIVE_BIT){
+        dogm204_end_loading_screen();
+        dogm204_print_error_screen("INTERRUPTING LOADING",WARNING_SOURCE_MAIN_DISPLAY);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
     if (!dogm204_screen_text_valid(screen_text)){
         return;
     }
@@ -603,6 +605,11 @@ void dogm204_print_message(char** screen_text, uint16_t display_time){
 void dogm204_print_screen_fancy(char** screen_text, uint16_t animation_time){
 
     // Animation time in ms
+    if (xEventGroupGetBits(loading_events) & LOADING_ACTIVE_BIT){
+        dogm204_end_loading_screen();
+        dogm204_print_error_screen("INTERRUPTING LOADING",WARNING_SOURCE_MAIN_DISPLAY);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
     dogm204_write_cmd(DOGM204_FUNCTION_SET);
     if (!dogm204_screen_text_valid(screen_text)){
         return;

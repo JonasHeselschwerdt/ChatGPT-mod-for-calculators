@@ -23,7 +23,11 @@ device.h: Hardware settings
 // Device Typedef, used to store settings and information related to the hardware
 
 typedef struct{
-    uint8_t debug_mode;
+    uint8_t debug_mode;                 // boolean
+    uint8_t main_display_contrast;      // 0...63
+    uint8_t side_display_contrast;      // 0...255
+    uint8_t side_display_on;            // boolean, if 0: all dep128064_print() commands are disabled
+    uint8_t side_display_toggle_mode;   // boolean, if 1: dep128064_power_toggle() works
 }device_TypeDef;
 
 
@@ -71,7 +75,7 @@ This is the case by default, don't change these!
 
 // Needed for some ADC operations
 
-#define GPIO_OUTPUT_HIGH_MV 3250        // Output high voltage of ESP32 GPIO
+#define GPIO_OUTPUT_HIGH_MV 3000        // Output high voltage of ESP32 GPIO
 
 
 

@@ -24,7 +24,7 @@ main.c: App_main
 #include "AI_calc_keypad.h"
 #include "AI_calc_maindisplay.h"
 #include "AI_calc_battery.h"
-
+#include "AI_calc_sidedisplay.h"
 
 
 
@@ -37,6 +37,7 @@ void app_main(void){
     device_init();
 
     if(device.debug_mode){
+        dep128064_start_screensaver(100);
         // Debuggincode start Display
         char* debug_text[MAIN_DISPLAY_ROWS]={
             "                    ",
@@ -68,7 +69,7 @@ void app_main(void){
         char* info_text2[MAIN_DISPLAY_ROWS] = {
             " You can find all   ",
             " design files for   ",
-            " this on GitHub:    ",
+            " this on my GitHub @",
             " JonasHeselschwerdt "
         };
         dogm204_print_screen(info_text2);
@@ -80,6 +81,8 @@ void app_main(void){
             EMPTY_LINE
         };
         dogm204_print_screen_fancy(fancy_text,3000);
+        dep128064_end_screensaver();
+        dep128064_clear_screen();
         // Debuggingcode start Keypad
         while(1){
             vTaskDelay(pdMS_TO_TICKS(UI_LOOP_DELAYTIME));
@@ -87,6 +90,7 @@ void app_main(void){
                 update_pressed_keys();
                 // Check shutdown condition
                 if ((cur_pressed_keys[0].special_function == KEY_SHIFT_SPECIAL_FUNC) && (cur_pressed_keys[1].special_function == KEY_MENU_SPECIAL_FUNC)){
+                    vTaskDelay(pdMS_TO_TICKS(500));
                     powerlatch_shutdown();
                 }
                 // Press DEL Key to display battery stats
@@ -113,6 +117,7 @@ void app_main(void){
                     };
                     dogm204_print_screen(explanation);
                     vTaskDelay(pdMS_TO_TICKS(2000));
+                    dep128064_refresh_status_screen();
                     dogm204_print_screen(info_screen);
                     vTaskDelay(pdMS_TO_TICKS(2000));
                 }

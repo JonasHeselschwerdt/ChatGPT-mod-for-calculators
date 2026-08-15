@@ -2,6 +2,9 @@
 /build/
 /cmake-build-*/
 
+# Library files:
+components/u8g2/csrc/
+
 # CMake / Ninja / Make artefacts
 CMakeCache.txt
 CMakeFiles/

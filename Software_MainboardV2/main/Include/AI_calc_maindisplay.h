@@ -112,6 +112,7 @@ maindisplay.h: Settings for main display (text LCD)
 // Error codes for error printing on main display
 
 #define ERROR_SOURCE_MAIN_DISPLAY   "MAIN DISPLAY ERROR  "
+#define WARNING_SOURCE_MAIN_DISPLAY "MAIN DISPLAY WARNING"
 #define ERROR_SOURCE_KEYPAD         "KEYPAD ERROR        "
 #define ERROR_SOURCE_BMS            "BMS ERROR           "
 

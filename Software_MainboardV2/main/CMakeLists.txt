@@ -8,4 +8,5 @@ idf_component_register(SRCS "Source/AI_calc_main.c"
                     INCLUDE_DIRS "Include"
                     REQUIRES driver
                     REQUIRES esp_timer
-                    REQUIRES esp_adc)
+                    REQUIRES esp_adc
+                    REQUIRES u8g2)
