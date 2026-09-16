@@ -20,7 +20,15 @@ Accuracy of BMS is limited due to standard fuel gauge model of MAX17048 used
 
 */
 
-// Includes
+// #region Includes
+
+/*
+#########################################################################################
+##                                                                                     ##
+##   Includes                                                                          ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 #include "math.h"
 #include "driver/i2c_master.h"
@@ -37,10 +45,17 @@ Accuracy of BMS is limited due to standard fuel gauge model of MAX17048 used
 #include "AI_calc_device.h"
 #include "AI_calc_maindisplay.h"
 
+// #endregion
 
+// #region Static variables
 
-
-// Static variables
+/*
+#########################################################################################
+##                                                                                     ##
+##  Static variables                                                                   ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static i2c_master_dev_handle_t max17048_dev = NULL;
 
@@ -64,12 +79,17 @@ static bms_typeDef bms = {
 static EventGroupHandle_t battery_events;
 static TaskHandle_t battery_task_handle;
 
+// #endregion
 
+// #region Extern variables
 
-
-
-
-// Global variables
+/*
+#########################################################################################
+##                                                                                     ##
+##   Extern variables                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 char* bms_error_strings[5] = {
     "                    ",
@@ -79,9 +99,17 @@ char* bms_error_strings[5] = {
     " BMS INVALID STATE  "
 };
 
+// #endregion
 
+// #region Static function declarations
 
-// Static function declarations
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static functions declarations                                                     ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void init_bms_state_LUT(void);
 static void bms_temp_adc_init(void);
@@ -95,12 +123,17 @@ static void max17048_read(uint8_t reg, uint16_t* data);
 
 static uint8_t check_battery_condition(void);
 
+// #endregion
 
+// #region Static functions
 
-
-
-
-// Static functions BMS
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void init_bms_state_LUT(void){
 
@@ -185,9 +218,9 @@ static int32_t bms_get_battery_temp(void){
     }
     else{
         // Activate the voltage divider first
-        gpio_set_level(BMS_NTC_VOLTAGE_DIV_ACT,1);
         gpio_set_direction(BMS_NTC_VOLTAGE_DIV_ACT, GPIO_MODE_OUTPUT);
-        vTaskDelay(pdMS_TO_TICKS(100));            // wait for C28 (see schematics) to charge up
+        gpio_set_level(BMS_NTC_VOLTAGE_DIV_ACT,1);
+        vTaskDelay(pdMS_TO_TICKS(200));            // wait for C28 (see schematics) to charge up
         // Rest as above
         for (uint8_t i=0; i<BMS_ADC_FILTER_CYCLES; i++){
             ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, adc_channel, &adc_raw));
@@ -314,6 +347,7 @@ static uint8_t check_battery_condition(void){
     if (bms.cell_millidegrees > BMS_HIGH_TEMP_SHUTDOWN){
         return BMS_TEMP_ERROR;
     }
+    // ESP_LOGI("BMS Task","Battery Temp: %d",(bms.cell_millidegrees/1000));
     // Cell Voltage
     uint16_t vcell_content;
     max17048_read(MAX_VCELL_REG,&vcell_content);
@@ -355,13 +389,17 @@ static void bms_monitoring_task(void *args){
     }
 }
 
+// #endregion
 
+// #region Extern functions
 
-
-
-
-
-// Exported functions
+/*
+#########################################################################################
+##                                                                                     ##
+##  Extern functions                                                                   ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 void create_bms_info_screen(char** info_screen){
 
@@ -406,7 +444,9 @@ uint8_t bms_init(void){
     max17048init();
     // Init battery task
     battery_events = xEventGroupCreate();
-    xTaskCreate(bms_monitoring_task,"BMS",2048,NULL,2,&battery_task_handle);
+    xTaskCreate(bms_monitoring_task,"BMS",4096,NULL,2,&battery_task_handle);
     xEventGroupSetBits(battery_events,BMS_ACTIVE_BIT);
     return (check_battery_condition());
 }
+
+// #endregion

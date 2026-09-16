@@ -185,7 +185,7 @@ typedef enum{
     KEY_MENU_SPECIAL_FUNC,
     KEY_BACK_SPECIAL_FUNC,
     KEY_ENTER_SPECIAL_FUNC,
-    KEY_CAMERA_SPECIAL_FUNC
+    KEY_CUSTOM_1_SPECIAL_FUNC           // different interpretation depending on UI-mode
 } KeySpecialFunc_TypeDef;
 
 typedef struct{

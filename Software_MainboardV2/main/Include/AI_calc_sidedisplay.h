@@ -23,6 +23,7 @@ of https://github.com/olikraus/u8g2 into components/u8g2
 
 #include "AI_calc_battery.h"
 #include "AI_calc_network.h"
+#include "AI_calc_UI.h"
 
 
 
@@ -78,19 +79,19 @@ typedef struct{
 // Device status screen
 
 typedef struct{
-    uint8_t battery_bars;           // 0...5
-    char battery_percentage[5];     // XXX%
-    uint8_t status_charging;        // boolean
-    uint8_t warning_low_bat;        // boolean
-    char battery_time_left[9];      // XXhYYmin
-    uint8_t battery_connected;      // boolean
-    uint8_t wifi_signal_waves;      // 0...3
-    char wifi_name[19];             // if longer put ... at back
-    char ai_name[11];               // if longer put ... at back
-    uint8_t api_provided;           // boolean
-    char ai_model[11];              // if longer put ... at back
-    char storage_used[10];          // XXX/YYYMB    (or GB if a SD card is added in the future)
-    char camera_state[4];           // boolean
+    uint8_t battery_bars;                       // 0...5
+    char battery_percentage[5];                 // XXX%
+    uint8_t status_charging;                    // boolean
+    uint8_t warning_low_bat;                    // boolean
+    char battery_time_left[9];                  // XXhYYmin
+    uint8_t battery_connected;                  // boolean
+    uint8_t wifi_signal_waves;                  // 0...3
+    char wifi_name[19];                         // if longer put ... at back
+    char ai_name[11];                           // if longer put ... at back
+    char ai_model_version[11];                  // if longer put ... at back
+    char storage_used_percentage[9];            // XXX/100%
+    char camera_storage_pictures[8];            // XXX/YYY
+    char uimode_title[10];
 }status_screen_TypeDef;
 
 
@@ -106,6 +107,6 @@ void dep128064_power_ctrl(uint8_t display_on);
 void dep128064_clear_screen(void);
 void dep128064_start_screensaver(uint16_t advance_interval);
 void dep128064_end_screensaver(void);
-void dep128064_refresh_status_screen(bms_typeDef* bms, wifi_manager_TypeDef* wifi);
+void dep128064_refresh_status_screen(bms_typeDef* bms,wifi_manager_TypeDef* wifi, UI_TypeDef* ui);
 
 #endif

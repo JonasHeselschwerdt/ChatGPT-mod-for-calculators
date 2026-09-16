@@ -9,7 +9,15 @@ keypad.c: Functions and variables to implement the TCA8418 via I2C
 
 */
 
-// Includes
+// #region Includes
+
+/*
+#########################################################################################
+##                                                                                     ##
+##  Includes                                                                           ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 #include "driver/i2c_master.h"
 #include "driver/gpio.h"
@@ -23,20 +31,33 @@ keypad.c: Functions and variables to implement the TCA8418 via I2C
 #include "AI_calc_UI.h"
 #include "AI_calc_keypad.h"
 
+// #endregion
 
+// #region Static variables
 
-
-
-// Static Keypad variables
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static variables                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static i2c_master_dev_handle_t tca8418_dev = NULL;
 
 static Key_TypeDef Key_LUT[128];     // 128 entries because EVENT_KEY_REG has 7 bit key-event-codes
 
+// #endregion
 
+// #region Extern variables
 
-
-// Extern variables
+/*
+#########################################################################################
+##                                                                                     ##
+##   Extern variables                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 // Needed during initialization of cur_pressed_keys in main.c
 Key_TypeDef no_key = {
@@ -49,11 +70,17 @@ Key_TypeDef no_key = {
     .press_timestamp = 0             // ms timestamp
 };
 
+// #endregion
 
+// #region Static function declarations
 
-
-
-// Static Function declarations
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static function declarations                                                      ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void tca8418_write(uint8_t reg, uint8_t data);
 static void tca8418_read(uint8_t reg, uint8_t *data);
@@ -62,12 +89,17 @@ static void initialize_KeyLUT(void);
 static void tca8418_get_key_FIFO(uint8_t* keypad_FIFO);
 static uint8_t compare_keys(Key_TypeDef *key1, Key_TypeDef *key2);
 
+// #endregion
 
+// #region Static functions
 
-
-
-// TCA8418 related static functions
-
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void tca8418_write(uint8_t reg, uint8_t data) {
 
@@ -144,7 +176,7 @@ static void initialize_KeyLUT(void){
     Key_LUT[KEY_ARROW_DOWN] =       (Key_TypeDef){  KEY_DOWN_SPECIAL_FUNC      ,'\0'    ,'\0'    ,'\0'    ,'\0'    ,0x00     ,0};
     Key_LUT[KEY_ARROW_RIGHT] =      (Key_TypeDef){  KEY_RIGHT_SPECIAL_FUNC     ,'\0'    ,'\0'    ,'\0'    ,'\0'    ,0x00     ,0};
     Key_LUT[KEY_SUM] =              (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,'c'     ,'C'     ,'\0'    ,'\0'    ,0x00     ,0};
-    Key_LUT[KEY_X] =                (Key_TypeDef){  KEY_CAMERA_SPECIAL_FUNC    ,'\0'    ,'\0'    ,'\0'    ,'\0'    ,0x00     ,0};
+    Key_LUT[KEY_X] =                (Key_TypeDef){  KEY_CUSTOM_1_SPECIAL_FUNC  ,'\0'    ,'\0'    ,'\0'    ,'\0'    ,0x00     ,0};
     Key_LUT[KEY_FRACTURE] =         (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,'d'     ,'D'     ,'\0'    ,'\0'    ,0x00     ,0};
     Key_LUT[KEY_SQRT] =             (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,'e'     ,'E'     ,'\0'    ,'\0'    ,0x00     ,0};
     Key_LUT[KEY_XSQUARED] =         (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,'f'     ,'F'     ,'\0'    ,'\0'    ,0x00     ,0};
@@ -179,7 +211,7 @@ static void initialize_KeyLUT(void){
     Key_LUT[KEY_PLUS] =             (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,'x'     ,'X'     ,'+'     ,'+'     ,0x00     ,0};
     Key_LUT[KEY_MINUS] =            (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,'y'     ,'Y'     ,'-'     ,'-'     ,0x00     ,0};
     Key_LUT[KEY_0] =                (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,'0'     ,'\0'    ,'\0'    ,'0'     ,0x00     ,0};
-    Key_LUT[KEY_COMMA] =            (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,','     ,';'     ,'\''    ,'\0'    ,0x00     ,0};
+    Key_LUT[KEY_COMMA] =            (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,','     ,';'     ,'\''    ,','    ,0x00      ,0};
     Key_LUT[KEY_POWEROFTEN] =       (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,' '     ,'_'     ,'\0'    ,'\0'    ,0x00     ,0};
     Key_LUT[KEY_ANS] =              (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,'.'     ,':'     ,'\0'    ,'a'     ,0x00     ,0};
     Key_LUT[KEY_EQUALS] =           (Key_TypeDef){  KEY_NO_SPECIAL_FUNC        ,'z'     ,'Z'     ,'='     ,'='     ,0x00     ,0};
@@ -201,12 +233,17 @@ static uint8_t compare_keys(Key_TypeDef *key1, Key_TypeDef *key2){
     return equal;
 }
 
+// #endregion
 
+// #region Extern functions
 
-
-
-
-// TCA8418 related exported functions
+/*
+#########################################################################################
+##                                                                                     ##
+##  Extern functions                                                                   ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 void tca8418_init_keypad(void){
 
@@ -369,3 +406,4 @@ void update_pressed_keys(Key_TypeDef* cur_pressed_keys){
     }
 }
 
+// #endregion

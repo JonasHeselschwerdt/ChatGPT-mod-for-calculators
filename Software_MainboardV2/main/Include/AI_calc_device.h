@@ -30,6 +30,15 @@ typedef struct{
     char name[32];                      // not used atm
 }device_TypeDef;
 
+// Default settings (get loaded if NVS fails)
+
+#define DEVICE_DEFAULT_DEBUG 0
+#define DEVICE_DEFAULT_MAINDIS_CONTR 50
+#define DEVICE_DEFAULT_SIDEDIS_CONTR 200
+#define DEVICE_DEFAULT_SIDEDIS_ON 0
+#define DEVICE_DEFAULT_NAME "AIcalcFX87/991_HW201_SW200_Test"
+#define DEVICE_DEFAULT_JPG_QLTY 6
+#define DEVICE_DEFAULT_FRAMESIZE QSXGA_2560_1920_PX
 
 
 
@@ -79,7 +88,7 @@ This is the case by default, don't change these!
 
 // Needed for some ADC operations (in battery.c)
 
-#define GPIO_OUTPUT_HIGH_MV 3000        // Output high voltage of ESP32 GPIO
+#define GPIO_OUTPUT_HIGH_MV 3000        // Output voltage of GPIO
 
 
 

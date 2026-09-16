@@ -9,10 +9,15 @@ device.c: GPIO, I2C, and other connectivity
 
 */
 
+// #region Includes
 
-
-
-// Includes
+/*
+#########################################################################################
+##                                                                                     ##
+##  Includes                                                                           ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 #include "driver/i2c_master.h"
 #include "driver/gpio.h"
@@ -30,36 +35,54 @@ device.c: GPIO, I2C, and other connectivity
 #include "AI_calc_network.h"
 #include "AI_calc_camera.h"
     
+// #endregion
 
+// #region Static variables
 
-
-
-// Static variables
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static variables                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 char* shutdown_text[MAIN_DISPLAY_ROWS] = {
     "====================",
     "  Device is         ",
-    "  shuting down      ",
+    "  shutting down     ",
     "===================="
 };
 
 static nvs_handle_t device_settings_handle;
 
+// #endregion
 
+// #region Extern variables
 
-
-// Generic global variables
+/*
+#########################################################################################
+##                                                                                     ##
+##   Extern variabels                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 i2c_master_bus_handle_t i2c_bus = NULL;
 
 device_TypeDef device;
 
+// #endregion
 
+// #region Static function declarations
 
-
-
-
-// Static function declarations
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static function declarations                                                      ##
+##                                                                                     ##
+#########################################################################################
+*/
 static void i2c_bus_init(void);
 
 static void gpios_init(void);
@@ -70,9 +93,17 @@ static void nvs_init(void);
 static void nvs_get_device_infos(void);
 static void nvs_save_device_infos(void);
 
+// #endregion
 
+// #region Static functions
 
-// Static functions I2C
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void i2c_bus_init(void){
 
@@ -87,12 +118,6 @@ static void i2c_bus_init(void){
     ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_config, &i2c_bus));
 }
 
-
-
-
-
-
-// Static functions GPIO
 
 static void gpios_init(void){
 
@@ -182,20 +207,17 @@ static void nvs_get_device_infos(void){
     // Open device namespace
     ESP_ERROR_CHECK(nvs_open("device", NVS_READWRITE, &device_settings_handle));
     if (nvs_get_u8(device_settings_handle,"debugmode",&device.debug_mode) != ESP_OK){
-        device.debug_mode = 1;  // default atm, change later to 0
+        device.debug_mode = DEVICE_DEFAULT_DEBUG;
     }
     if (nvs_get_u8(device_settings_handle,"maindis_contr",&device.main_display_contrast) != ESP_OK){
-        device.main_display_contrast = 50;  // default
+        device.main_display_contrast = DEVICE_DEFAULT_MAINDIS_CONTR;
     }
     if (nvs_get_u8(device_settings_handle,"sidedis_contr",&device.side_display_contrast) != ESP_OK){
-        device.side_display_contrast = 200;  // default
-    }
-    if (nvs_get_u8(device_settings_handle,"sidedis_on",&device.side_display_on) != ESP_OK){
-        device.side_display_on = 1;  // default
+        device.side_display_contrast = DEVICE_DEFAULT_SIDEDIS_CONTR;
     }
     size_t name_length = sizeof(device.name);
     if (nvs_get_str(device_settings_handle,"name",device.name,&name_length) != ESP_OK){
-        strcpy(device.name,"AIcalcFX87/991_HW201_SW200_Test");  // default
+        strcpy(device.name,DEVICE_DEFAULT_NAME);
     }
 }
 
@@ -208,22 +230,27 @@ static void nvs_save_device_infos(void){
     nvs_set_u8(device_settings_handle,"debugmode",device.debug_mode);
     nvs_set_u8(device_settings_handle,"maindis_contr",device.main_display_contrast);
     nvs_set_u8(device_settings_handle,"sidedis_contr",device.side_display_contrast);
-    nvs_set_u8(device_settings_handle,"sidedis_on",device.side_display_on);
     nvs_set_str(device_settings_handle,"name",device.name);
     nvs_commit(device_settings_handle);
 }
 
+// #endregion
 
+// #region Extern functions
 
-
-
-
-// Exported functions
+/*
+#########################################################################################
+##                                                                                     ##
+##    Extern functions                                                                 ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 void powerlatch_shutdown(void){
 
     // turns off device properly and informs user
     nvs_save_device_infos();
+    dogm204_display_control(DOGM204_CURSOR_OFF_BIT|DOGM204_CURSOR_NO_BLINK_BIT|DOGM204_DISPLAY_ON_BIT);
     dogm204_print_screen(shutdown_text);
     vTaskDelay(pdMS_TO_TICKS(1000));
     gpio_set_level(ESP_N_POWERLATCH,1);
@@ -241,7 +268,7 @@ void device_init(void){
     gpios_init();
     free_gpios_init();
     gpios_set_default();
-    // ADC and I2C
+    // I2C
     i2c_bus_init();
     // Get device informations from NVS
     // before peripherals are initialized
@@ -252,8 +279,11 @@ void device_init(void){
     tca8418_init_gpios();
     // Main display
     dogm204_init();
+    dogm204_clear_screen();
     // Sidedisplay
     dep128064_init();
+    dep128064_clear_screen();
+    device.side_display_on = 0;
     // BMS
     uint8_t bms_initial_state = bms_init();
     if (bms_initial_state != BMS_OK){
@@ -267,3 +297,4 @@ void device_init(void){
     wifi_init();
 }
 
+// #endregion

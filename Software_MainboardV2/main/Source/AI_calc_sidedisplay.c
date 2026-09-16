@@ -17,7 +17,15 @@ of https://github.com/olikraus/u8g2 into components/u8g2
 
 */
 
-// Includes 
+// #region Includes 
+
+/*
+#########################################################################################
+##                                                                                     ##
+##  Includes                                                                           ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 #include "u8g2.h"
 #include "driver/i2c_master.h"
@@ -30,13 +38,21 @@ of https://github.com/olikraus/u8g2 into components/u8g2
 #include "AI_calc_sidedisplay.h"
 #include "AI_calc_device.h"
 #include "AI_calc_battery.h"
-#include "AI_Calc_network.h"
+#include "AI_calc_network.h"
+#include "AI_calc_camera.h"
+#include "AI_calc_UI.h"
 
+// #endregion
 
+// #region Static function declarations
 
-
-
-// Static function declarations
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static function declarations                                                      ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static uint8_t cb_dep128064_i2c_transmit(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
 static uint8_t cb_dep128064_delay(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr);
@@ -50,13 +66,21 @@ static void dep128064_print_screensaver(void);
 static void advance_screensaver(void);
 
 static void generate_status_screen_bms(status_screen_TypeDef* status_screen, bms_typeDef* bms);
+static void generate_status_screen_wifi(status_screen_TypeDef* status_screen, wifi_manager_TypeDef* wifi);
 static void dep128064_print_status_screen(status_screen_TypeDef* status_screen);
+static void generate_status_screen_ui_generic(status_screen_TypeDef* status_screen, UI_TypeDef* ui);
 
+// #endregion
 
+// #region Static variables
 
-
-
-// Static variables
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static variables                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 u8g2_t u8g2;
 
@@ -114,12 +138,18 @@ static const uint8_t image_folder_open_bits[] = {0x0f,0x00,0xf9,0x00,0x01,0x01,0
 
 static const uint8_t image_camera_bits[] = {0xff,0x03,0x09,0x02,0xff,0x03,0xcd,0x03,0xb7,0x03,0xb7,0x03,0xcf,0x03,0xff,0x03};
 
-static const uint8_t image_key_bits[] = {0x00,0x02,0x00,0x05,0xff,0x05,0x5a,0x05,0x00,0x05,0x00,0x02};
-
-static const uint8_t image_check_bits[] = {0x00,0x03,0x80,0x01,0xc0,0x00,0x63,0x00,0x36,0x00,0x1c,0x00,0x08,0x00};
-static const uint8_t image_cross_small_bits[] = {0x03,0x03,0xce,0x01,0x78,0x00,0x30,0x00,0x78,0x00,0xce,0x01,0x03,0x03};
-
 static const uint8_t image_robot_bits[] = {0x7e,0xff,0x81,0xa5,0x81,0xbd,0x81,0x7e};
+
+static const uint8_t pencil_bits[] = {0x80,0x01,0x40,0x02,0xa0,0x04,0x50,0x05,0xa8,0x02,0x54,0x01,0xaa,0x00,0x57,0x00,0x2d,0x00,0x19,0x00,0x0f,0x00};
+
+static const uint8_t letter_bits[] = {0xff,0x81,0xc3,0xa5,0x99,0x81,0x81,0xff};
+static const uint8_t arrows_bits[] = {0x80,0x00,0x80,0x01,0xff,0x03,0x80,0x01,0x80,0x00,0x04,0x00,0x06,0x00,0xff,0x03,0x06,0x00,0x04,0x00};
+
+static const uint8_t menusign_bits[] = {0xfd,0x03,0x00,0x00,0xfd,0x03,0x00,0x00,0xfd,0x03,0x00,0x00,0xfd,0x03};
+
+static const uint8_t textinput_bits[] = {0x01,0x00,0x03,0x00,0x06,0x00,0x0c,0x00,0x0c,0x00,0x06,0x00,0x03,0x00,0xe1,0x07};
+
+static const uint8_t file_bits[] = {0x3f,0x00,0x61,0x00,0xa1,0x00,0xe1,0x01,0x01,0x01,0x7d,0x01,0x01,0x01,0x7d,0x01,0x01,0x01,0xff,0x01};
 
 // Wifi signal strenght from high to low
 static const uint8_t image_wifi3_3_bits[] = {0xfe,0x01,0x01,0x02,0xfc,0x00,0x02,0x01,0x78,0x00,0x84,0x00,0x30,0x00,0x30,0x00};
@@ -127,11 +157,17 @@ static const uint8_t image_wifi2_3_bits[] = {0x7e,0x81,0x3c,0x42,0x18,0x18};
 static const uint8_t image_wifi1_3_bits[] = {0x1e,0x21,0x0c,0x0c};
 static const uint8_t image_wifi0_3_bits[] = {0xfe,0x01,0x01,0x02,0xfc,0x00,0x02,0x01,0x78,0x00,0x80,0x0a,0x30,0x04,0x30,0x0a};
 
+// #endregion
 
+// #region Static functions
 
-
-
-// Static functions
+/*
+#########################################################################################
+##                                                                                     ##
+##  Static functions                                                                   ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static uint8_t cb_dep128064_i2c_transmit(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr){
 
@@ -367,12 +403,58 @@ static void generate_status_screen_wifi(status_screen_TypeDef* status_screen, wi
         }
         strcpy(status_screen->wifi_name,wifi->connected_wifi.ssid);
     }
-    // Rest not implemented yet: Assign default values
-    strcpy(status_screen->ai_name,"ChatGPT   ");
-    status_screen->api_provided = 0;
-    strcpy(status_screen->ai_model,"GPT 5.5   ");
-    strcpy(status_screen->storage_used," 67/ 67MB");
-    strcpy(status_screen->camera_state,"Off");
+    // Rest not implemented yet: Assign example values
+    strcpy(status_screen->storage_used_percentage,"  0/100%");
+}
+
+static void generate_status_screen_ui_generic(status_screen_TypeDef* status_screen, UI_TypeDef* ui){
+
+    // UI mode
+    switch (ui->UI_mode){
+        case UI_MODE_SCRIBBLE:
+            strcpy(status_screen->uimode_title,"Scribble");
+            break;
+        case UI_MODE_CHATVIEW:
+            strcpy(status_screen->uimode_title,"Chatview");
+            break;
+        case UI_MODE_TEXTINPUT:
+            strcpy(status_screen->uimode_title,"Textinput");
+            break;
+        case UI_MODE_MENU:
+            strcpy(status_screen->uimode_title,"Menu");
+            break;
+        case UI_MODE_FILEVIEW:
+            strcpy(status_screen->uimode_title,"Fileview");
+            break;
+        default:
+            strcpy(status_screen->uimode_title,"");
+    }
+    // Ai model name and version name
+    switch (ui->current_ai_model){
+        case AI_MODEL_OPENAI:
+            strcpy(status_screen->ai_name,"OpenAI");
+            ui->openai_model_version[sizeof(status_screen->ai_model_version)-1] = '\0';
+            strcpy(status_screen->ai_model_version,ui->openai_model_version);
+            break;
+        case AI_MODEL_GEMINI:
+            ui->gemini_model_version[sizeof(status_screen->ai_model_version)-1] = '\0';
+            strcpy(status_screen->ai_model_version,ui->gemini_model_version);
+            strcpy(status_screen->ai_name,"Gemini");
+            break;
+        case AI_MODEL_CLAUDE:
+            ui->claude_model_version[sizeof(status_screen->ai_model_version)-1] = '\0';
+            strcpy(status_screen->ai_model_version,ui->claude_model_version);
+            strcpy(status_screen->ai_name,"Claude");
+            break;
+    }
+    // Camera directory saved pics
+    snprintf(status_screen->camera_storage_pictures,
+            sizeof(status_screen->camera_storage_pictures),
+            "%u/%-u",
+            ui->cam_img_cnt,
+            MAX_SAVED_PICTURES);
+    // File system usage (not implemented yet)
+    strcpy(status_screen->storage_used_percentage,"  0/100%");
 }
 
 static void dep128064_print_status_screen(status_screen_TypeDef* status_screen){
@@ -383,6 +465,11 @@ static void dep128064_print_status_screen(status_screen_TypeDef* status_screen){
     u8g2_ClearBuffer(&u8g2);
     u8g2_SetBitmapMode(&u8g2, 1);
     u8g2_SetFontMode(&u8g2, 1);
+    // Draw lines on screen
+    u8g2_DrawLine(&u8g2, 2, 12, 123, 12);
+    u8g2_DrawLine(&u8g2, 2, 25, 124, 25);
+    u8g2_DrawLine(&u8g2, 3, 48, 124, 48);
+    u8g2_DrawLine(&u8g2, 78, 28, 78, 45);
     // Draw battery sign
     if (status_screen->battery_connected){
         u8g2_DrawXBM(&u8g2, 3, 1, 19, 8, battery_icons[status_screen->battery_bars]);
@@ -419,36 +506,52 @@ static void dep128064_print_status_screen(status_screen_TypeDef* status_screen){
     // AI Name
     u8g2_DrawXBM(&u8g2, 4, 28, 8, 8, image_robot_bits);
     u8g2_DrawStr(&u8g2, 16, 36, status_screen->ai_name);
-    u8g2_DrawXBM(&u8g2, 3, 40, 8, 8, image_speechbubble_bits);
-    u8g2_DrawStr(&u8g2, 16, 48, status_screen->ai_model);
-    // API key state
-    u8g2_DrawStr(&u8g2, 96, 36, "API");
-    u8g2_DrawXBM(&u8g2, 114, 29, 11, 6, image_key_bits);
-    if (status_screen->api_provided){
-        u8g2_DrawXBM(&u8g2, 85, 29, 10, 7, image_check_bits);
+    u8g2_DrawXBM(&u8g2, 3, 38, 8, 8, image_speechbubble_bits);
+    u8g2_DrawStr(&u8g2, 13, 46, status_screen->ai_model_version);
+    // UI mode
+    u8g2_SetFont(&u8g2, u8g2_font_5x7_tr);
+    if (strcmp(status_screen->uimode_title,"Scribble")==0){
+        u8g2_DrawXBM(&u8g2, 96, 27, 11, 11, pencil_bits);
+        u8g2_DrawStr(&u8g2, 83, 46, status_screen->uimode_title);
     }
-    else{
-        u8g2_DrawXBM(&u8g2, 85, 29, 10, 7, image_cross_small_bits);
+    else if (strcmp(status_screen->uimode_title,"Chatview")==0){
+        u8g2_DrawXBM(&u8g2, 92, 29, 8, 8, letter_bits);
+        u8g2_DrawXBM(&u8g2, 105, 28, 10, 10, arrows_bits);
+        u8g2_DrawStr(&u8g2, 84, 46, status_screen->uimode_title);
     }
-    u8g2_DrawLine(&u8g2, 2, 12, 123, 12);
-    // Camera state
-    u8g2_DrawStr(&u8g2, 107, 62, status_screen->camera_state);
-    u8g2_DrawLine(&u8g2, 2, 25, 124, 25);
-    u8g2_DrawXBM(&u8g2, 93, 54, 10, 8, image_camera_bits);
-    u8g2_DrawLine(&u8g2, 3, 51, 124, 51);
+    else if (strcmp(status_screen->uimode_title,"Menu")==0){
+        u8g2_DrawStr(&u8g2, 92, 45, status_screen->uimode_title);
+        u8g2_DrawXBM(&u8g2, 97, 29, 10, 7, menusign_bits);
+    }
+    else if (strcmp(status_screen->uimode_title,"Textinput")==0){
+        u8g2_DrawStr(&u8g2, 81, 45, status_screen->uimode_title);
+        u8g2_DrawXBM(&u8g2, 95, 28, 11, 8, textinput_bits);
+    }
+    else if (strcmp(status_screen->uimode_title,"Fileview")==0){
+        u8g2_DrawStr(&u8g2, 84, 45, status_screen->uimode_title);
+        u8g2_DrawXBM(&u8g2, 98, 27, 9, 10, file_bits);
+    }
+    u8g2_SetFont(&u8g2, u8g2_font_t0_11b_tr);
+    // Camera file system usage stats
+    u8g2_DrawXBM(&u8g2, 72, 53, 10, 8, image_camera_bits);
+    u8g2_DrawStr(&u8g2, 84, 61, status_screen->camera_storage_pictures);
     // File system state
-    u8g2_DrawXBM(&u8g2, 3, 54, 11, 8, image_folder_open_bits);
-    u8g2_DrawStr(&u8g2, 16, 62, status_screen->storage_used);
+    u8g2_DrawXBM(&u8g2,3,53,11,8,image_folder_open_bits);
+    u8g2_DrawStr(&u8g2, 15, 61, status_screen->storage_used_percentage);
     u8g2_SendBuffer(&u8g2);
 }
 
+// #endregion
 
+// #region Extern functions
 
-
-
-
-
-// Exported functions
+/*
+#########################################################################################
+##                                                                                     ##
+##   Extern functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 void dep128064_init(void){
     // Initialize the display
@@ -523,11 +626,14 @@ void dep128064_end_screensaver(void){
 }
 
 
-void dep128064_refresh_status_screen(bms_typeDef* bms,wifi_manager_TypeDef* wifi){
+void dep128064_refresh_status_screen(bms_typeDef* bms,wifi_manager_TypeDef* wifi, UI_TypeDef* ui){
 
     if (device.side_display_on){
         generate_status_screen_bms(&status_screen, bms);
         generate_status_screen_wifi(&status_screen, wifi);
+        generate_status_screen_ui_generic(&status_screen,ui);
         dep128064_print_status_screen(&status_screen);
     }
 }
+
+// #endregion

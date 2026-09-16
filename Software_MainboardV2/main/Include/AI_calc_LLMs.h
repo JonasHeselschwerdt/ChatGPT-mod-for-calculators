@@ -95,6 +95,9 @@ typedef struct{
 
 
 
+// More settings
+#define API_KEY_MAX_LENGTH 280
+
 
 
 
@@ -109,5 +112,6 @@ void start_openai_conversation(char* new_prompt, char* ans_dest, size_t ans_dest
 void get_openai_response(char* new_prompt, char* ans_dest, size_t ans_dest_size, char (*pic_urls)[64], const char* model_ver);
 void load_prev_openai_response(uint16_t chat_position, char* ans_dest, size_t ans_dest_size);
 void load_prev_openai_prompt(uint16_t chat_position, char* prompt_dest, size_t prompt_dest_size);
+uint16_t openai_chat_dir_text_exchanges(void);
 
 #endif

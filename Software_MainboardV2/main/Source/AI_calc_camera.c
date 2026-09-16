@@ -9,7 +9,15 @@ camera.c: Functions related to the camera and image processing (using esp_camera
 
 */
 
-// Include 
+// #region Includes
+
+/*
+#########################################################################################
+##                                                                                     ##
+##   Incldues                                                                          ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 #include "esp_camera.h"
 #include "esp_err.h"
@@ -27,12 +35,17 @@ camera.c: Functions related to the camera and image processing (using esp_camera
 #include "AI_calc_camera.h"
 #include "AI_calc_device.h"
 
+// #endregion
 
+// #region Static variables
 
-
-
-
-// Static variables
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static variables                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static nvs_handle_t camera_nvs_handle;
 
@@ -50,11 +63,17 @@ static camera_fb_t *pic;
 // Only for debugging through a http server
 static httpd_handle_t camera_http_server = NULL;
 
+// #endregion
 
+// #region Static function declarations
 
-
-
-// Static function declarations
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static function declarations                                                      ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void camera_nvs_init(void);
 static void nvs_get_cam_settings(framesize_t* framesize, uint8_t* jpeg_quality);
@@ -65,11 +84,17 @@ static esp_err_t ov5640_init(void);
 static esp_err_t camera_http_get_handler(httpd_req_t *req);             // Only for debugging
 static esp_err_t camera_image_http_get_handler(httpd_req_t *req);       // Only for debugging
 
+// #endregion
 
+// #region Static functions
 
-
-
-// Static functions
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void camera_nvs_init(void){
 
@@ -248,12 +273,17 @@ static esp_err_t camera_image_http_get_handler(httpd_req_t *req){
     return httpd_resp_send_chunk(req, NULL, 0);
 }
 
+// #endregion
 
+// #region Extern functions
 
-
-
-
-// Exported functions
+/*
+#########################################################################################
+##                                                                                     ##
+##   Extern functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 void camera_init(void){
 
@@ -395,6 +425,15 @@ esp_err_t get_saved_pictures_paths(size_t* directory_size, uint8_t* file_cnt, ch
     return ESP_OK;
 }
 
+esp_err_t get_saved_pics(uint8_t* pic_cnt){
+
+    size_t dir_size;
+    if (camera_directory_get_size(&dir_size,pic_cnt) != ESP_OK){
+        return ESP_FAIL;
+    }
+    return ESP_OK;
+}
+
 // Only for debugging:
 void camera_start_debug_http_server(void){
 
@@ -430,3 +469,5 @@ void camera_end_debug_http_server(void){
         ESP_LOGI("Camera HTTP", "Server stopped");
     } 
 }
+
+// #endregion

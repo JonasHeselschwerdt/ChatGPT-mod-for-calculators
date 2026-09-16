@@ -5,11 +5,19 @@ ChatGPT Hardware Hack for calculators: Software V2
 © 2026 Jonas Heselschwerdt
 Licensed under CC BY-NC 4.0
 
-maindisplay.h: Functions and variables to control text LCDs via I2C
+maindisplay.h: Functions and variables to control the DOGM204 text LCD via I2C
 
 */
 
-// Includes
+// #region Includes
+
+/*
+#########################################################################################
+##                                                                                     ##
+##  Includes                                                                           ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 #include "esp_err.h"
 #include "esp_log.h"
@@ -24,12 +32,17 @@ maindisplay.h: Functions and variables to control text LCDs via I2C
 #include "AI_calc_UI.h"
 #include "AI_calc_maindisplay.h"
 
+// #endregion
 
+// #region Static variables
 
-
-
-
-// Static main display variables
+/*
+#########################################################################################
+##                                                                                     ##
+##  Static variables                                                                   ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static i2c_master_dev_handle_t dogm204_dev = NULL;
 
@@ -87,13 +100,17 @@ static const char animation_divider[] = {
     '\0'
 };
 
+// #endregion
 
+// #region Static function declarations
 
-
-
-
-
-// Static function declarations
+/*
+#########################################################################################
+##                                                                                     ##
+##  Static function declarations                                                       ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 // Base functions
 static void dogm204_write_cmd(uint8_t cmd);
@@ -113,12 +130,17 @@ static void dogm204_loading_screen_task_init(void);
 static void dogm204_advance_loading_screen(void);
 static void dogm204_loading_screen_task(void* arg);
 
+// #endregion
 
+// #region Static functions
 
-
-
-
-// Static main display functions
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void dogm204_write_cmd(uint8_t cmd){
 
@@ -296,6 +318,8 @@ static void initialize_MainDisplayLUT(void){
     MainDisplay_LUT[DOGM204_FULLBLOCK] = 0x1F;
     MainDisplay_LUT[DOGM204_DEGREE_SIGN] = 0x80;        // using ^0 as 'degree' sign
     MainDisplay_LUT[DOGM204_DELTA_SIGN] = 0xB0;
+    MainDisplay_LUT[DOGM204_MENU_POINTER_SIGN] = 0x10;
+    MainDisplay_LUT[DOGM204_BALL_SIGN] = 0xBB;
 }
 
 static void initialize_MainDisplayReverseLUT(void){
@@ -423,13 +447,17 @@ static void dogm204_advance_loading_screen(void){
     }
 }
 
+// #endregion
 
+// #region Extern Functions
 
-
-
-
-
-// Exported main display functions
+/*
+#########################################################################################
+##                                                                                     ##
+##   Extern functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 void dogm204_init(void){
 
@@ -667,3 +695,4 @@ void dogm204_end_loading_screen(void){
     xEventGroupClearBits(loading_events,LOADING_ACTIVE_BIT);
 }
 
+// #endregion

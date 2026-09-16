@@ -71,7 +71,7 @@ void wifi_init(void);
 esp_err_t wifi_add_login_credentials(char* new_ssid,char* new_pass, uint8_t index);
 esp_err_t wifi_set_prefered_wifi(uint8_t index);
 void get_wifi_state(wifi_manager_TypeDef* wifi);
-
+esp_err_t get_wifi_ssid(uint8_t login_index, char* ssid, size_t ssid_len_max);
 
 
 #endif

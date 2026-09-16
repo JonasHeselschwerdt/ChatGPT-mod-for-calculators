@@ -12,9 +12,15 @@ LLMs.c: Handles communication with the APIs of AI-Assistants
 // Implemented: OpenAI Responses API
 // Still missing: Gemini, Claude
 
+// #region Includes
 
-
-// Includes
+/*
+#########################################################################################
+##                                                                                     ##
+##  Includes                                                                           ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 #include "freertos/FreeRTOS.h"
 #include "nvs_flash.h"
@@ -35,12 +41,17 @@ LLMs.c: Handles communication with the APIs of AI-Assistants
 #include "AI_calc_UI.h"
 #include "AI_calc_camera.h"
 
+// #endregion
 
+// #region Generic static variables
 
-
-
-
-// Static variables (generic)
+/*
+#########################################################################################
+##                                                                                     ##
+##  Generic static variables                                                           ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static nvs_handle_t api_keys_handle;
 
@@ -50,11 +61,17 @@ static const char base64_LUT[64] = {
     '0','1','2','3','4','5','6','7','8','9','+','/'
 };
 
+// #endregion
 
+// #region OpenAI static variables
 
-
-
-// Static variables (openAI)
+/*
+#########################################################################################
+##                                                                                     ##
+##   OpenAI static variables                                                           ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static EventGroupHandle_t openai_events;
 static nvs_handle_t responseID_handle;
@@ -72,16 +89,32 @@ static const char* openai_supported_models[] = {
     "gpt-5.6-luna"
 };
 
+// #endregion
 
+// #region Generic static function declarations
 
-
-
-
-
-// Static function declarations
+/*
+#########################################################################################
+##                                                                                     ##
+##  Generic static function declarations                                               ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void apikey_nvs_init(void);
 static void base64_encode(uint8_t* raw_data, size_t raw_data_lenght, char* dest);
+
+// #endregion
+
+// #region OpenAI static function declarations
+
+/*
+#########################################################################################
+##                                                                                     ##
+##   OpenAI static function declarations                                               ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 // OpenAI chat save logic
 static esp_err_t openAI_chat_clear_chatdata(void);
@@ -100,13 +133,17 @@ static esp_err_t openAI_create_request_json(const char* previous_response_id,cha
 static esp_err_t openAI_http_post(const char* request_json,char** response_json);
 static esp_err_t openAI_process_response_json(const char* response_json,char* response_id, ans_task_params* parameters);
 
+// #endregion
 
+// #region OpenAI static functions
 
-
-
-
-
-// Static functions (openAI related)
+/*
+#########################################################################################
+##                                                                                     ##
+##  OpenAI static fucntions                                                            ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void openAI_nvs_init(void){
 
@@ -206,7 +243,7 @@ static esp_err_t openAI_chatdata_get_item(char* string_dest, uint16_t chat_pos, 
     if (!file) {
         return ESP_FAIL;
     }
-    size_t bytes_read = fread(string_dest,1,(ANSWER_PAGE_LENGTH+1),file);
+    fread(string_dest,1,(ANSWER_PAGE_LENGTH+1),file);
     fclose(file);
     return ESP_OK;
 }
@@ -440,7 +477,7 @@ static esp_err_t openAI_http_post(const char* request_json,char** response_json)
     }
     // HTTP headers
     // Get API key from nvs
-    char API_key[200] = {0};
+    char API_key[API_KEY_MAX_LENGTH+1] = {0};
     size_t length = sizeof(API_key);
     ret = nvs_get_str(api_keys_handle,"openai",API_key,&length);
     if (ret != ESP_OK){
@@ -450,7 +487,7 @@ static esp_err_t openAI_http_post(const char* request_json,char** response_json)
     if (ret != ESP_OK){
         goto cleanup;
     }
-    char auth_header[256];
+    char auth_header[API_KEY_MAX_LENGTH+8];
     snprintf(auth_header,sizeof(auth_header),"Bearer %s",API_key);
     ret = esp_http_client_set_header(client,"Authorization",auth_header);
     if (ret != ESP_OK){
@@ -614,11 +651,17 @@ static void openAI_get_answer_task(void* parameters){
     vTaskDelete(NULL);
 }
 
+// #endregion
 
+// #region Generic static functions
 
-
-
-// Generic static functions
+/*
+#########################################################################################
+##                                                                                     ##
+##   Generic static functions                                                          ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void apikey_nvs_init(void){
 
@@ -681,10 +724,17 @@ static void base64_encode(uint8_t* raw_data, size_t raw_data_length, char* dest)
     }
 }
 
+// #endregion
 
+// #region Generic extern functions
 
-
-// Exported functions (generic)
+/*
+#########################################################################################
+##                                                                                     ##
+##   Generic extern functions                                                          ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 void llms_init(void){
 
@@ -719,12 +769,17 @@ esp_err_t save_API_Key(ai_model_TypeDef ai_model, char* api_key){
     return ESP_OK;
 }
 
+// #endregion
 
+// #region OpenAI extern functions
 
-
-
-
-// Exported functions (OpenAI)
+/*
+#########################################################################################
+##                                                                                     ##
+##  OpenAI extern functions                                                            ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 void start_openai_conversation(char* new_prompt, char* ans_dest, size_t ans_dest_size, char (*pic_paths)[64], const char* model_ver){
 
@@ -831,3 +886,16 @@ void load_prev_openai_prompt(uint16_t chat_position, char* prompt_dest, size_t p
     }
     openAI_chatdata_get_item(prompt_dest,chat_position,0);
 }
+
+uint16_t openai_chat_dir_text_exchanges(void)
+{
+    char buf[SCRIBBLE_PAGE_LENGTH + 1];
+    for (int16_t i = MAX_CONVERSATION_LENGTH - 1; i >= 0; i--) {
+        if (openAI_chatdata_get_item(buf, i, 0) == ESP_OK){
+            return (uint16_t)(i + 1);
+        }
+    }
+    return 0;
+}
+
+// #endregion

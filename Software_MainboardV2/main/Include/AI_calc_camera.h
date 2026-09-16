@@ -113,6 +113,7 @@ void camera_set_jpeg_quality(uint8_t jpeg_quality);
 void camera_set_framesize(uint8_t framesize_code);
 
 esp_err_t get_saved_pictures_paths(size_t* directory_size, uint8_t* file_cnt, char (*pic_paths)[64]);
+esp_err_t get_saved_pics(uint8_t* pic_cnt);
 
 void camera_start_debug_http_server(void);      // Only for debugging
 void camera_end_debug_http_server(void);        // Only for debugging

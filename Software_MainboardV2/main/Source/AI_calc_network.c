@@ -9,7 +9,15 @@ network.h: Wifi manager code
 
 */
 
-// Inlcudes
+// #region Includes
+
+/*
+#########################################################################################
+##                                                                                     ##
+##   Inlcudes                                                                          ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -25,11 +33,17 @@ network.h: Wifi manager code
 #include "AI_calc_camera.h"     // Only for debugging
 #include "AI_calc_device.h"
 
+// #endregion
 
+// #region Static variables
 
-
-
-// Static variables
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static variables                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static nvs_handle_t wifi_ssid_pass_handle;
 
@@ -38,10 +52,17 @@ static TaskHandle_t wifi_task_handle;
 static wifi_login_TypeDef login_data[WIFI_MAX_STORED_LOGINDATA];
 static wifi_manager_TypeDef wifi_manager;
 
+// #endregion
 
+// #region Static function declarations
 
-
-// Static function declarations
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static function declarations                                                      ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void wifi_nvs_init(void);
 static esp_err_t wifi_load_login(wifi_login_TypeDef* login, uint8_t login_index);
@@ -53,13 +74,17 @@ static void wifi_event_handler(void *arg,esp_event_base_t event_base,int32_t eve
 static esp_err_t wifi_try_connect_to(wifi_login_TypeDef* target_AP);
 static esp_err_t evaluate_AP_scan(wifi_ap_record_t** found_APs, uint16_t* found_AP_count);
 
+// #endregion
 
+// #region Static functions
 
-
-
-
-
-// Static functions
+/*
+#########################################################################################
+##                                                                                     ##
+##   Static functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 static void wifi_nvs_init(void){
 
@@ -206,12 +231,6 @@ static void wifi_event_handler(void *arg,esp_event_base_t event_base,int32_t eve
         wifi_manager.IPv4[1] = (event->ip_info.ip.addr >> 8) & 0xFF;
         wifi_manager.IPv4[2] = (event->ip_info.ip.addr >> 16) & 0xFF;
         wifi_manager.IPv4[3] = (event->ip_info.ip.addr >> 24) & 0xFF;
-        // Only for cameradebugging: (I think I will remove this later idk)
-        /*
-        if (device.debug_mode){
-            camera_start_debug_http_server();
-        }
-        */
     }
 }
 
@@ -301,13 +320,17 @@ static esp_err_t wifi_load_login(wifi_login_TypeDef* login, uint8_t login_index)
     return ESP_OK;
 }
 
+// #endregion
 
+// #region Extern functions
 
-
-
-
-
-// Exported functions
+/*
+#########################################################################################
+##                                                                                     ##
+##   Extern functions                                                                  ##
+##                                                                                     ##
+#########################################################################################
+*/
 
 
 void wifi_init(void){
@@ -362,3 +385,35 @@ void get_wifi_state(wifi_manager_TypeDef* wifi){
         wifi->IPv4[i] = wifi_manager.IPv4[i];
     }
 }
+
+esp_err_t get_wifi_ssid(uint8_t login_index, char* ssid, size_t ssid_len_max){
+
+    // Getter function needed in UI, if ssid_len_max < SSID lenght, it gets cut off
+    // Only use for user information, not for technical applications
+    if ((login_index >= WIFI_MAX_STORED_LOGINDATA) || ssid_len_max < 10){
+        return ESP_FAIL;
+    }
+    wifi_login_TypeDef selected_login;
+    if (wifi_load_login(&selected_login,login_index) != ESP_OK){
+        return ESP_FAIL;
+    }
+    strncpy(ssid,selected_login.ssid,ssid_len_max);
+    size_t ssid_len = strlen(selected_login.ssid);
+    if (ssid_len > (ssid_len_max-1)){
+        // Put 3 dots at the end
+        ssid[ssid_len_max-1] = '\0';
+        ssid[ssid_len_max-2] = '.';
+        ssid[ssid_len_max-3] = '.';
+        ssid[ssid_len_max-4] = '.';
+    }
+    else{
+        // Pad with spaces if necessary
+        for (uint8_t i=ssid_len; i<(ssid_len_max-1); i++){
+            ssid[i] = ' ';
+        }
+        ssid[ssid_len_max-1] = '\0';
+    }
+    return ESP_OK;
+}
+
+// #endregion

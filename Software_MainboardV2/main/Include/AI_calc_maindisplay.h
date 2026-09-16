@@ -5,7 +5,7 @@ ChatGPT Hardware Hack for calculators: Software V2
 © 2026 Jonas Heselschwerdt
 Licensed under CC BY-NC 4.0
 
-maindisplay.h: Settings for main display (text LCD)
+maindisplay.h: Settings for main display (DOGM204 text LCD)
 
 */
 
@@ -130,7 +130,8 @@ maindisplay.h: Settings for main display (text LCD)
 #define DOGM204_DEGREE_SIGN 0xFC        
 #define DOGM204_BATTERY_SIGN 0xFB       // custom
 #define DOGM204_DELTA_SIGN 0xFA
-
+#define DOGM204_MENU_POINTER_SIGN 0xF9
+#define DOGM204_BALL_SIGN 0xF8
 
 
 
