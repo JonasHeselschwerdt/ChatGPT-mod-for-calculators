@@ -80,6 +80,11 @@ camera.h: Camera settings (using esp_camera component)
 
 
 
+// Camera settings restrictions
+
+#define CAMERA_MAX_JPG_QLTY 64
+
+
 
 // Flash memory restrictions
 
@@ -110,6 +115,7 @@ esp_err_t camera_take_picture(void);
 esp_err_t delete_camera_directory(void);
 
 void camera_set_jpeg_quality(uint8_t jpeg_quality);
+uint8_t camera_get_jpg_quality(void);
 void camera_set_framesize(uint8_t framesize_code);
 
 esp_err_t get_saved_pictures_paths(size_t* directory_size, uint8_t* file_cnt, char (*pic_paths)[64]);

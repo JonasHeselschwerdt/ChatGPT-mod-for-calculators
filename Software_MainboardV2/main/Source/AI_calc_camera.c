@@ -302,8 +302,8 @@ esp_err_t camera_take_picture(void){
 
     // If this function returns ESP_OK the captured image is succesfully saved in LittleFS
     camera_on = 1;
-    ESP_LOGI("Camera","Taking pic, Framesizecode: %d",camera_current_framesize_code);
-    ESP_LOGI("Camera","JPEG Quality: %d",camera_current_jpeg_quality);
+    // ESP_LOGI("Camera","Taking pic, Framesizecode: %d",camera_current_framesize_code);
+    // ESP_LOGI("Camera","JPEG Quality: %d",camera_current_jpeg_quality);
     gpio_set_level(CAMERA_POWER_ENABLE,1);
     vTaskDelay(pdMS_TO_TICKS(500));
     if (ov5640_init() != ESP_OK){
@@ -376,8 +376,16 @@ esp_err_t camera_take_picture(void){
 
 void camera_set_jpeg_quality(uint8_t jpeg_quality){
 
-    camera_current_jpeg_quality = (jpeg_quality<64)?jpeg_quality:DEFAULT_JPEG_QUALITY;
+    camera_current_jpeg_quality = (jpeg_quality<CAMERA_MAX_JPG_QLTY)?jpeg_quality:DEFAULT_JPEG_QUALITY;
     nvs_save_cam_settings(camera_current_framesize_code,camera_current_jpeg_quality);
+}
+
+uint8_t camera_get_jpg_quality(void){
+
+    framesize_t frame;
+    uint8_t jpg_qlty;
+    nvs_get_cam_settings(&frame,&jpg_qlty);
+    return jpg_qlty;
 }
 
 void camera_set_framesize(uint8_t framesize_code){

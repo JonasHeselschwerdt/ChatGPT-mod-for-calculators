@@ -69,8 +69,8 @@ typedef enum{
 
 // UI Typedef
 typedef struct{
-    uint8_t autooff_tresh_mins;     
-    uint8_t delete_imgs_after_sending;
+    uint8_t autooff_tresh_mins;                 // if 0: no autooff timer
+    uint8_t delete_imgs_after_sending;          // boolean
     UI_mode_TypeDef UI_mode;                    // not saved in NVS
     ai_model_TypeDef current_ai_model;
     uint8_t cam_img_cnt;                        // not saved in NVS
@@ -81,6 +81,11 @@ typedef struct{
     char UI_version_string[32];                 // not saved in NVS
     char unlock_code[MAIN_DISPLAY_COLUMNS+1];
 }UI_TypeDef;
+
+/*
+Warning: If you forget your unlock code, you will have to perform a factory reset manually
+by running idf.py erase-flash and flash again
+*/
 
 // Default settings if NVS fails
 
@@ -113,7 +118,6 @@ struct menu_entry_TypeDef{
 };
 #define MENU_END {"","",NO_CHILD,NO_PARENT,NO_ENTER_CB,NO_LEFT_CB,NO_RIGHT_CB}  // always has to be the last entry in a menu!
 
-// If no callback is needed for an entry:
 #define NO_CHILD NULL
 #define NO_PARENT NULL
 #define NO_ENTER_CB NULL

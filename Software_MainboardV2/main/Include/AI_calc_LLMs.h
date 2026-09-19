@@ -113,5 +113,6 @@ void get_openai_response(char* new_prompt, char* ans_dest, size_t ans_dest_size,
 void load_prev_openai_response(uint16_t chat_position, char* ans_dest, size_t ans_dest_size);
 void load_prev_openai_prompt(uint16_t chat_position, char* prompt_dest, size_t prompt_dest_size);
 uint16_t openai_chat_dir_text_exchanges(void);
+void openai_delete_chats(void);
 
 #endif

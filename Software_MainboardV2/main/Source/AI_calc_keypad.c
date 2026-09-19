@@ -70,6 +70,9 @@ Key_TypeDef no_key = {
     .press_timestamp = 0             // ms timestamp
 };
 
+char calculatormode_allowed_keys[] = {'0','1','2','3','4','5','6','7','8','9','+','-','*','/','a',','};
+size_t allowed_key_amount = sizeof(calculatormode_allowed_keys);
+
 // #endregion
 
 // #region Static function declarations

@@ -489,6 +489,7 @@ static esp_err_t openAI_http_post(const char* request_json,char** response_json)
     }
     char auth_header[API_KEY_MAX_LENGTH+8];
     snprintf(auth_header,sizeof(auth_header),"Bearer %s",API_key);
+    // ESP_LOGI("Test","API KEY:|%s|",auth_header);
     ret = esp_http_client_set_header(client,"Authorization",auth_header);
     if (ret != ESP_OK){
         goto cleanup;
@@ -621,7 +622,7 @@ static void openAI_get_answer_task(void* parameters){
             xEventGroupSetBits(openai_events, OPENAI_DONE_BIT);
             vTaskDelete(NULL);
         }
-        //ESP_LOGI("JSON Request","\n %s",request_json);
+        // ESP_LOGI("JSON Request","\n %s",request_json);
     }
     // Http POST Json
     char* response_json = NULL;
@@ -896,6 +897,12 @@ uint16_t openai_chat_dir_text_exchanges(void)
         }
     }
     return 0;
+}
+
+void openai_delete_chats(void){
+
+    // To manually clear chatdata in UI, ignores return value
+    openAI_chat_clear_chatdata();
 }
 
 // #endregion

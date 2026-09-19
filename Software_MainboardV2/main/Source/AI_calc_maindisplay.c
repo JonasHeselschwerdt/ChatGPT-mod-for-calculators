@@ -102,6 +102,22 @@ static const char animation_divider[] = {
 
 // #endregion
 
+// #region Extern variables
+
+/*
+#########################################################################################
+##                                                                                     ##
+##  Extern variables                                                                   ##
+##                                                                                     ##
+#########################################################################################
+*/
+
+char empty_line[MAIN_DISPLAY_COLUMNS+1] = "                    ";
+char style_line_equal_sign[MAIN_DISPLAY_COLUMNS+1] = "====================";
+
+// #endregion
+
+
 // #region Static function declarations
 
 /*

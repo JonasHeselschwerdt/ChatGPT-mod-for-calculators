@@ -35,6 +35,7 @@ UI.c: UI-Functions and Variables
 #include "AI_calc_network.h"
 #include "AI_calc_maindisplay.h"
 #include "AI_calc_sidedisplay.h"
+#include "AI_calc_main.h"
 
 // #endregion
 
@@ -66,72 +67,230 @@ ai_model_TypeDef api_key_for_temp;
 
 // A handful of often-used info texts
 static char* ui_unlock_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     "     Starting AI    ",
     "    Calculator UI   ",
-    "===================="
+    STYLE_LINE
 };
 static char* feature_missing_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     "   This feature     ",
     " is not implemented ",
-    "===================="
+    STYLE_LINE
 };
 static char* ai_model_not_supported_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     "  Please select a   ",
     " different AI model ",
-    "===================="
+    STYLE_LINE
 };
 static char* taking_pic_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     "      Taking        ",
     "      Picture       ",
-    "===================="
+    STYLE_LINE
 };
 static char* chatview_mode_enter_fail_instead_scribble_enter_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     " Can't go to chat   ",
     " No chat files saved",
-    "===================="
+    STYLE_LINE
 };
 static char* wifi_saved_success_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     "  Wifi credentials  ",
     " saved successfully ",
-    "===================="
+    STYLE_LINE
 };
 static char* wifi_saved_fail_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     " Error while trying ",
     "    to save wifi    ",
-    "===================="    
+    STYLE_LINE    
 };
 static char* apikey_saved_success_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     "   API Key saved    ",
     "   successfully     ",
-    "===================="
+    STYLE_LINE
 };
 static char* apikey_saved_fail_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     " Error while trying ",
     "  to save API Key   ",
-    "===================="
+    STYLE_LINE
 };
 static char* pref_wifi_saved_success_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     " Set preferred wifi ",
     "   successfully     ",
-    "===================="
+    STYLE_LINE
 };
 static char* pref_wifi_saved_fail_msg[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     " Error while trying ",
     " set preferred wifi ",
-    "===================="    
+    STYLE_LINE    
 };
-
+static char* wifi_on_ctrl_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "    Turned wifi     ",
+    "         ON         ",
+    STYLE_LINE
+};
+static char* wifi_off_ctrl_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "    Turned wifi     ",
+    "        OFF         ",
+    STYLE_LINE
+};
+static char* deleted_chats_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "    Deleted the     ",
+    "   chat history     ",
+    STYLE_LINE
+};
+static char* ui_unlck_code_change_warning_msg1[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    " Do not forget this ",
+    "   unlock code!     ",
+    STYLE_LINE
+};
+static char* ui_unlck_code_change_warning_msg2[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    " If you forget,you  ",
+    " will be locked out ",
+    STYLE_LINE
+};
+static char* ui_unlck_code_changed_success_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "   Changed unlock   ",
+    "  code successfully ",
+    STYLE_LINE
+};
+static char* ui_unlck_code_changed_fail_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "   Error: Invalid   ",
+    "  sign in new code  ",
+    STYLE_LINE
+};
+static char* changed_ai_model_ver_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "Successfully changed",
+    " the model version  ",
+    STYLE_LINE
+};
+static char* changed_ai_model_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "Successfully changed",
+    "   the AI model     ",
+    STYLE_LINE
+};
+// Device Info page
+static char* device_info1[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "  Device info page  ",
+    " AI-Calculator Mod  ",
+    STYLE_LINE
+};
+static char* device_info2[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    SOFTWARE_VERSION_STRING,
+    HARDWARE_VERSION_STRING,
+    STYLE_LINE
+};
+char debug_status[MAIN_DISPLAY_COLUMNS+1];
+static char* device_info3[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    DEVICE_STATUS_STRING,
+    debug_status,
+    STYLE_LINE
+};
+static char* device_info4[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "Device Name:        ",
+    device.name,
+    STYLE_LINE
+};
+static char* device_info5[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "Designed by         ",
+    "ElectrJonics in 2026",
+    STYLE_LINE
+};
+// End device info page
+static char* name_changed_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "Successfully changed",
+    "    device name     ",
+    STYLE_LINE
+};
+static char* enter_debug_question_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "Set debug mode?Incl.",
+    "experiment. features",
+    STYLE_LINE
+};
+static char* leave_debug_question_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    " Leave debug mode,  ",
+    "      again?        ",
+    STYLE_LINE
+};
+static char* entered_debug_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "Experiment. features",
+    "/debugmode activated",
+    STYLE_LINE
+};
+static char* left_debug_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "  You left debug    ",
+    "      mode          ",
+    STYLE_LINE
+};
+static char* factory_rst_warning1[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "Delete all user data",
+    "  stored in Flash?  ",
+    STYLE_LINE
+};
+static char* factory_rst_warning2[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "    Device will     ",
+    " restart afterwards ",
+    STYLE_LINE
+};
+static char* flash_erased_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "    Erased flash    ",
+    "   Restarting now   ",
+    STYLE_LINE
+};
+static char* not_in_debug_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "Feature(s) disabled ",
+    "Activate debugmode  ",
+    STYLE_LINE
+};
+static char* deleted_imgs_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    " Deleted all saved  ",
+    "      images        ",
+    STYLE_LINE
+};
+static char* changed_framesize_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "    Changed the     ",
+    "     framesize      ",
+    STYLE_LINE
+};
+static char* changed_setting_generic_msg[MAIN_DISPLAY_ROWS] = {
+    STYLE_LINE,
+    "     Changed        ",
+    "     Setting        ",
+    STYLE_LINE
+};
 
 // #endregion
 
@@ -179,6 +338,8 @@ static text_input_mode_typeDef textinputmode;
 void textinput_cb_1(void);
 void textinput_cb_2(void);
 void textinput_cb_3(void);
+void textinput_cb_4(void);
+void textinput_cb_5(void);
 
 // Textinput pages forward declarations
 textinput_page_TypeDef enter_ssid_page;
@@ -238,21 +399,22 @@ menu_entry_TypeDef filesys_main_menu[];
 menu_entry_TypeDef ui_main_menu[];
 menu_entry_TypeDef device_main_menu[];
 menu_entry_TypeDef debugging_main_menu[];
-
+// Wifi
 menu_entry_TypeDef wifis_edit_menu[WIFI_MAX_STORED_LOGINDATA+1];
 menu_entry_TypeDef wifis_man_choose_menu[WIFI_MAX_STORED_LOGINDATA+1];
-
+// AI
 menu_entry_TypeDef chose_ai_menu[];
 menu_entry_TypeDef choose_openai_ver_menu[];
 menu_entry_TypeDef api_select_ai_menu[];
-
+menu_entry_TypeDef img_del_after_prompt_menu[];
+// UI
 menu_entry_TypeDef autooff_settings_menu[];
 menu_entry_TypeDef unlck_change_conf_menu[];
-
+// Device
 menu_entry_TypeDef display_contr_set_menu[];
 menu_entry_TypeDef camera_settings_menu[];
 menu_entry_TypeDef set_framesize_menu[];
-
+// Confirmation
 menu_entry_TypeDef factory_rst_conf_menu[];
 menu_entry_TypeDef enter_debug_conf_menu[];
 
@@ -298,7 +460,13 @@ void menu_cb_47(void);
 void menu_cb_48(void);
 void menu_cb_49(void);
 void menu_cb_50(void);
-
+void menu_cb_51(void);
+void menu_cb_52(void);
+void menu_cb_53(void);
+void menu_cb_54(void);
+void menu_cb_55(void);
+void menu_cb_56(void);
+void menu_cb_57(void);
 
 // #endregion
 
@@ -532,7 +700,7 @@ static void UI_sidetask(void* arg){
             // Increment autoofftimer
             seconds_since_last_user_activity += (UI_SIDETASK_LOOP_DELAYTIME/1000);
         }
-        if (seconds_since_last_user_activity > (uint16_t)(UI.autooff_tresh_mins*60)){
+        if ((seconds_since_last_user_activity > (uint16_t)(UI.autooff_tresh_mins*60)) && (UI.autooff_tresh_mins != 0)){
             // Shutdown device due to user inactivity
             nvs_save_ui_infos();
             powerlatch_shutdown();
@@ -626,15 +794,13 @@ static void handle_pressed_keys_calc(Key_TypeDef* cur_pressed_keys){
     }
     else if (cur_pressed_keys[0].special_function == KEY_BACK_SPECIAL_FUNC){
         // delete from equation, shift everything to the left
-        for (uint8_t i=calculatormode.calc_cursor_pos; i<(MAIN_DISPLAY_COLUMNS-1); i++){
-            calculatormode.equation_page[i] = calculatormode.equation_page[i+1];
-        }
-        calculatormode.equation_page[MAIN_DISPLAY_COLUMNS-1] = ' ';
-        if (calculatormode.equation_len > 0){
-            calculatormode.equation_len--;
-        }
-        if (calculatormode.calc_cursor_pos > 0){
+        if ((calculatormode.calc_cursor_pos != 0) && (calculatormode.equation_len != 0)){
             calculatormode.calc_cursor_pos--;
+            for (uint8_t i=calculatormode.calc_cursor_pos; i<(MAIN_DISPLAY_COLUMNS-1); i++){
+                calculatormode.equation_page[i] = calculatormode.equation_page[i+1];
+            }
+            calculatormode.equation_page[MAIN_DISPLAY_COLUMNS-1] = ' ';
+            calculatormode.equation_len--;
         }
     }
     else if (cur_pressed_keys[0].special_function == KEY_RIGHT_SPECIAL_FUNC){
@@ -869,19 +1035,18 @@ static void scribble_page_inject_at_cursor_pos(char sign){
 }
 
 static void scribble_page_delete_at_cursor_pos(void){
-        
-    scribblemode.scribble_page[scribblemode.scribble_cursor_pos] = ' ';
+    
+    if ((scribblemode.scribble_cursor_pos == 0) || (scribblemode.scribble_page_length == 0)){
+        // Nothing to delete
+        return;
+    }
+    scribblemode.scribble_cursor_pos--;
     // Shift everything to the right of injection point to the left
     for (uint16_t i=scribblemode.scribble_cursor_pos; i<(SCRIBBLE_PAGE_LENGTH-1); i++){
         scribblemode.scribble_page[i]=scribblemode.scribble_page[i+1];
     }
     scribblemode.scribble_page[SCRIBBLE_PAGE_LENGTH-1]=' ';
-    if (scribblemode.scribble_cursor_pos > 0){
-        scribblemode.scribble_cursor_pos--;
-    }
-    if (scribblemode.scribble_page_length > 0){
-        scribblemode.scribble_page_length--;
-    }
+    scribblemode.scribble_page_length--;
 }
 
 static void scribble_page_print_at_cursor_pos(void){
@@ -951,7 +1116,7 @@ static void handle_pressed_keys_scribble(Key_TypeDef* cur_pressed_keys){
             vTaskDelay(pdMS_TO_TICKS(1000));
             return;
         }
-        else if (cur_pressed_keys[1].special_function == KEY_NO_SPECIAL_FUNC){
+        else if ((cur_pressed_keys[1].special_function == KEY_NO_SPECIAL_FUNC) && (cur_pressed_keys[1].shift_meaning != '\0')){
             scribble_page_inject_at_cursor_pos(cur_pressed_keys[1].shift_meaning);
         }
     }
@@ -977,7 +1142,7 @@ static void handle_pressed_keys_scribble(Key_TypeDef* cur_pressed_keys){
         scribble_page_delete_at_cursor_pos();
     }
     else if (cur_pressed_keys[0].special_function == KEY_ALT_SPECIAL_FUNC){
-        if (cur_pressed_keys[1].special_function == KEY_NO_SPECIAL_FUNC){
+        if ((cur_pressed_keys[1].special_function == KEY_NO_SPECIAL_FUNC) && (cur_pressed_keys[1].alt_meaning != '\0')){
             scribble_page_inject_at_cursor_pos(cur_pressed_keys[1].alt_meaning);
         }
     }
@@ -998,7 +1163,7 @@ static void handle_pressed_keys_scribble(Key_TypeDef* cur_pressed_keys){
         // Navigate with cursor
         scribble_mode_move_cursor(&cur_pressed_keys[0]);
     }
-    else if (cur_pressed_keys[0].special_function == KEY_NO_SPECIAL_FUNC){
+    else if ((cur_pressed_keys[0].special_function == KEY_NO_SPECIAL_FUNC) && (cur_pressed_keys[0].normal_meaning != '\0')){
         scribble_page_inject_at_cursor_pos(cur_pressed_keys[0].normal_meaning);
     }
     // At the end, print scribble_page
@@ -1111,7 +1276,7 @@ static void handle_pressed_keys_textinput(Key_TypeDef* cur_pressed_keys){
             vTaskDelay(pdMS_TO_TICKS(1000));
             return;
         }
-        else if (cur_pressed_keys[1].special_function == KEY_NO_SPECIAL_FUNC){
+        else if ((cur_pressed_keys[1].special_function == KEY_NO_SPECIAL_FUNC) && (cur_pressed_keys[1].shift_meaning != '\0')){
             // Inject to textinput page
             textinput_page_inject_at_cursor(cur_pressed_keys[1].shift_meaning);
         }
@@ -1129,7 +1294,7 @@ static void handle_pressed_keys_textinput(Key_TypeDef* cur_pressed_keys){
     }
     else if (cur_pressed_keys[0].special_function == KEY_RIGHT_SPECIAL_FUNC){
         // Navigate in textinput page
-        if (textinputmode.textinput_cursor_pos <= textinputmode.textinput_page_length){
+        if (textinputmode.textinput_cursor_pos < textinputmode.textinput_page_length){
             textinputmode.textinput_cursor_pos++;
         }
     }
@@ -1160,7 +1325,7 @@ static void handle_pressed_keys_textinput(Key_TypeDef* cur_pressed_keys){
         }
     }
     else if (cur_pressed_keys[0].special_function == KEY_ALT_SPECIAL_FUNC){
-        if (cur_pressed_keys[1].special_function == KEY_NO_SPECIAL_FUNC){
+        if ((cur_pressed_keys[1].special_function == KEY_NO_SPECIAL_FUNC) && (cur_pressed_keys[1].alt_meaning != '\0')){
             // Inject to textinput page
             textinput_page_inject_at_cursor(cur_pressed_keys[1].alt_meaning);
         }
@@ -1169,7 +1334,7 @@ static void handle_pressed_keys_textinput(Key_TypeDef* cur_pressed_keys){
         // Delete at cursor position
         textinput_page_delete_at_cursor();
     }
-    else if (cur_pressed_keys[0].special_function == KEY_NO_SPECIAL_FUNC){
+    else if ((cur_pressed_keys[0].special_function == KEY_NO_SPECIAL_FUNC) && (cur_pressed_keys[0].normal_meaning != '\0')){
         // Inject at textinput page
         textinput_page_inject_at_cursor(cur_pressed_keys[0].normal_meaning);
     }
@@ -1193,6 +1358,8 @@ static void handle_pressed_keys_textinput(Key_TypeDef* cur_pressed_keys){
 textinput_page_TypeDef enter_ssid_page =  {">Enter Wifi SSID    ",NO_SENSITIVE_INFO,  wifi_main_menu,     &enter_passw_page, textinput_cb_1};
 textinput_page_TypeDef enter_passw_page=  {">Enter password     ",SENSITIVE_INFO,     wifi_main_menu,     NO_GOTO_PAGE,      textinput_cb_2};
 textinput_page_TypeDef enter_api_key_page={">Enter API Key      ",NO_SENSITIVE_INFO,  api_select_ai_menu, NO_GOTO_PAGE,      textinput_cb_3};
+textinput_page_TypeDef enter_unlock_page= {">Enter new code     ",NO_SENSITIVE_INFO,  ui_main_menu,       NO_GOTO_PAGE,      textinput_cb_4};
+textinput_page_TypeDef enter_name_page =  {">Enter device name  ",NO_SENSITIVE_INFO,  device_main_menu,   NO_GOTO_PAGE,      textinput_cb_5};
 
 // #endregion
 
@@ -1246,7 +1413,6 @@ void textinput_cb_2(void){
 void textinput_cb_3(void){
 
     // Save API key
-    ESP_LOGI("Test","Scribble(Pre): |%.80s|",scribblemode.scribble_page);
     textinputmode.textinput_page[(API_KEY_MAX_LENGTH>TEXTINPUT_PAGE_LENGTH)?TEXTINPUT_PAGE_LENGTH:API_KEY_MAX_LENGTH] = '\0';
     // Terminate string at the end of user input
     textinputmode.textinput_page[textinputmode.textinput_page_length] = '\0';
@@ -1263,6 +1429,56 @@ void textinput_cb_3(void){
     else{
         dogm204_print_screen(apikey_saved_fail_msg);
     }
+    vTaskDelay(pdMS_TO_TICKS(1000));
+}
+void textinput_cb_4(void){
+
+    // Check if what the user typed in is valid
+    if (textinputmode.textinput_page_length > MAIN_DISPLAY_COLUMNS){
+        // Invalid, too long
+        dogm204_print_screen(ui_unlck_code_changed_fail_msg);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        return;
+    }
+    // Terminate string at the end of line
+    textinputmode.textinput_page[MAIN_DISPLAY_COLUMNS] = '\0';
+    // Can this string be typed into calculatormode?
+    for (uint8_t i=0; i<textinputmode.textinput_page_length; i++){
+        for (uint8_t j=0; j<allowed_key_amount; j++){
+            if (textinputmode.textinput_page[i] == calculatormode_allowed_keys[j]){
+                break;
+            }
+            if (j == (allowed_key_amount-1)){
+                // Invalid sign used
+                dogm204_print_screen(ui_unlck_code_changed_fail_msg);
+                vTaskDelay(pdMS_TO_TICKS(1000));
+                return;
+            }
+        }
+    }
+    // String is valid
+    strcpy(UI.unlock_code,textinputmode.textinput_page);
+    // Reset textinput_page
+    for (uint16_t i=0; i<(TEXTINPUT_PAGE_LENGTH-1); i++){
+        textinputmode.textinput_page[i]=' ';
+    }
+    // Success screen
+    dogm204_display_control(DOGM204_CURSOR_OFF_BIT|DOGM204_CURSOR_NO_BLINK_BIT|DOGM204_DISPLAY_ON_BIT);
+    dogm204_print_screen(ui_unlck_code_changed_success_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+}
+void textinput_cb_5(void){
+
+    // Terminate string at the end of line
+    textinputmode.textinput_page[MAIN_DISPLAY_COLUMNS] = '\0';
+    strcpy(device.name,textinputmode.textinput_page);
+    // Reset textinput_page
+    for (uint16_t i=0; i<(TEXTINPUT_PAGE_LENGTH-1); i++){
+        textinputmode.textinput_page[i]=' ';
+    }
+    // Success screen
+    dogm204_display_control(DOGM204_CURSOR_OFF_BIT|DOGM204_CURSOR_NO_BLINK_BIT|DOGM204_DISPLAY_ON_BIT);
+    dogm204_print_screen(name_changed_msg);
     vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
@@ -1798,7 +2014,18 @@ void menu_cb_8(void){
 void menu_cb_9(void){
 
     // If max. conversation lenght is reached, disable continuing prev. chat (also if no previous chat exists)
-    uint16_t text_exchanges = openai_chat_dir_text_exchanges();
+    uint16_t text_exchanges = 0;
+    switch (UI.current_ai_model){
+        case AI_MODEL_OPENAI:
+            text_exchanges = openai_chat_dir_text_exchanges();
+            break;
+        case AI_MODEL_GEMINI:
+            text_exchanges = 0;     // not implemented yet
+            break;
+        case AI_MODEL_CLAUDE:
+            text_exchanges = 0;     // not implemented yet
+            break;
+    }
     // ESP_LOGI("Test","Textexchanges: %u",text_exchanges);
     if ((text_exchanges == 0) || (text_exchanges >= (MAX_CONVERSATION_LENGTH-1))){
         pre_prompt_settings_menu[1] = (menu_entry_TypeDef)MENU_END;
@@ -1827,7 +2054,7 @@ menu_entry_TypeDef main_menu[] = {
 {"Main Menu          ",    "AI Settings        ",   ai_main_menu,               NO_PARENT,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
 {"Main Menu          ",    "File system        ",   filesys_main_menu,          NO_PARENT,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
 {"Main Menu          ",    "UI Settings        ",   ui_main_menu,               NO_PARENT,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
-{"Main Menu          ",    "Device Settings    ",   device_main_menu,           NO_PARENT,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
+{"Main Menu          ",    "Device Settings    ",   device_main_menu,           NO_PARENT,      menu_cb_53,     NO_LEFT_CB,     NO_RIGHT_CB},
 {"Main Menu          ",    "Debugging          ",   debugging_main_menu,        NO_PARENT,      menu_cb_10,     NO_LEFT_CB,     NO_RIGHT_CB},
 MENU_END
 };
@@ -1847,6 +2074,7 @@ menu_entry_TypeDef ai_main_menu[] = {
 {"AI Settings        ",    "Claude Version     ",   NO_CHILD,                   main_menu,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
 {"AI Settings        ",    "Enter API Code     ",   api_select_ai_menu,         main_menu,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
 {"AI Settings        ",    "Delete chat history",   NO_CHILD,                   main_menu,      menu_cb_14,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"AI Settings        ",    "Images after prompt",   img_del_after_prompt_menu,  main_menu,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
 MENU_END
 };
 
@@ -1857,18 +2085,20 @@ MENU_END
 };
 
 menu_entry_TypeDef ui_main_menu[] = {
-{"UI Settings        ",    "Auto-off-timer     ",   autooff_settings_menu,      main_menu,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
+{"UI Settings        ",    "Auto-off-timer     ",   autooff_settings_menu,      main_menu,      menu_cb_51,     NO_LEFT_CB,     NO_RIGHT_CB},
 {"UI Settings        ",    "Side display       ",   NO_CHILD,                   main_menu,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
 {"UI Settings        ",    "UI unlock code     ",   unlck_change_conf_menu,     main_menu,      menu_cb_16,     NO_LEFT_CB,     NO_RIGHT_CB},
 MENU_END
 };
 
+// Special case: Debug mode switched from enter<->leave depending on device.debug_mode
 menu_entry_TypeDef device_main_menu[] = {
 {"Device Settings    ",    "Set display contr. ",   display_contr_set_menu,     main_menu,      menu_cb_17,     NO_LEFT_CB,     NO_RIGHT_CB},
 {"Device Settings    ",    "Get device info    ",   NO_CHILD,                   main_menu,      menu_cb_18,     NO_LEFT_CB,     NO_RIGHT_CB},
-{"Device Settings    ",    "Camera settings    ",   camera_settings_menu,       main_menu,      NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
+{"Device Settings    ",    "Camera settings    ",   camera_settings_menu,       main_menu,      menu_cb_55,     NO_LEFT_CB,     NO_RIGHT_CB},
 {"Device Settings    ",    "Factory reset      ",   factory_rst_conf_menu,      main_menu,      menu_cb_19,     NO_LEFT_CB,     NO_RIGHT_CB},
 {"Device Settings    ",    "Enter debug mode   ",   enter_debug_conf_menu,      main_menu,      menu_cb_20,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"Device Settings    ",    "Change device name ",   NO_CHILD,                   main_menu,      menu_cb_52,     NO_LEFT_CB,     NO_RIGHT_CB},
 MENU_END
 };
 
@@ -1904,15 +2134,21 @@ menu_entry_TypeDef api_select_ai_menu[] = {
 MENU_END
 };
 
+menu_entry_TypeDef img_del_after_prompt_menu[] = {
+{"After sending...   ",    "...delete images   ",   NO_CHILD,                   ai_main_menu,   menu_cb_56,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"After sending...   ",    "...keep images     ",   NO_CHILD,                   ai_main_menu,   menu_cb_57,     NO_LEFT_CB,     NO_RIGHT_CB},
+MENU_END
+};
+
 // Special case: Entry texts changed dynamically at runtime via callbacks
 menu_entry_TypeDef autooff_settings_menu[] = {
-{"Auto-off-Timer     ",    "Activated:         ",   NO_CHILD,                   ui_main_menu,   menu_cb_33,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"Auto-off-Timer     ",    "State:             ",   NO_CHILD,                   ui_main_menu,   menu_cb_33,     NO_LEFT_CB,     NO_RIGHT_CB},
 {"Auto-off-Timer     ",    "Set to     min     ",   NO_CHILD,                   ui_main_menu,   NO_ENTER_CB,    menu_cb_34,     menu_cb_35},
 MENU_END
 };
 
 menu_entry_TypeDef unlck_change_conf_menu[] = {
-{"Proceed?           ",    "Yes                ",   NO_CHILD,                   ui_main_menu,   menu_cb_36,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"Proceed?           ",    "Yes                ",   ui_main_menu,               ui_main_menu,   menu_cb_36,     NO_LEFT_CB,     NO_RIGHT_CB},
 {"Proceed?           ",    "No, go back        ",   ui_main_menu,               ui_main_menu,   NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
 MENU_END
 };
@@ -1934,40 +2170,43 @@ MENU_END
 
 // Make sure these match up with the ones supported in camera.h!
 menu_entry_TypeDef set_framesize_menu[] = {
-{"Set framesize      ",    "VGA_640_480_PX      ",  NO_CHILD,          camera_settings_menu,    menu_cb_44,     NO_LEFT_CB,     NO_RIGHT_CB},
-{"Set framesize      ",    "XGA_1024_768_PX     ",  NO_CHILD,          camera_settings_menu,    menu_cb_45,     NO_LEFT_CB,     NO_RIGHT_CB},
-{"Set framesize      ",    "UXGA_1600_1200_PX   ",  NO_CHILD,          camera_settings_menu,    menu_cb_46,     NO_LEFT_CB,     NO_RIGHT_CB},
-{"Set framesize      ",    "QSXGA_2560_1920_PX  ",  NO_CHILD,          camera_settings_menu,    menu_cb_47,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"Set framesize      ",    "VGA_640_480_PX     ",  NO_CHILD,          camera_settings_menu,    menu_cb_44,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"Set framesize      ",    "XGA_1024_768_PX    ",  NO_CHILD,          camera_settings_menu,    menu_cb_45,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"Set framesize      ",    "UXGA_1600_1200_PX  ",  NO_CHILD,          camera_settings_menu,    menu_cb_46,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"Set framesize      ",    "QSXGA_2560_1920_PX ",  NO_CHILD,          camera_settings_menu,    menu_cb_47,     NO_LEFT_CB,     NO_RIGHT_CB},
 MENU_END
 };
 
 menu_entry_TypeDef factory_rst_conf_menu[] = {
-{"Proceed?           ",    "Yes                 ",  NO_CHILD,               device_main_menu,   menu_cb_48,     NO_LEFT_CB,     NO_RIGHT_CB},
-{"Proceed?           ",    "No, go back         ",  device_main_menu,       device_main_menu,   NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
+{"Proceed?           ",    "Yes                ",  NO_CHILD,               device_main_menu,   menu_cb_48,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"Proceed?           ",    "No, go back        ",  device_main_menu,       device_main_menu,   NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
 MENU_END
 };
 
 menu_entry_TypeDef enter_debug_conf_menu[] = {
-{"Proceed?           ",    "Yes                 ",  NO_CHILD,               device_main_menu,   menu_cb_48,     NO_LEFT_CB,     NO_RIGHT_CB},
-{"Proceed?           ",    "No, go back         ",  device_main_menu,       device_main_menu,   NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
+{"Proceed?           ",    "Yes                ",  device_main_menu,       device_main_menu,   menu_cb_54,     NO_LEFT_CB,     NO_RIGHT_CB},
+{"Proceed?           ",    "No, go back        ",  device_main_menu,       device_main_menu,   NO_ENTER_CB,    NO_LEFT_CB,     NO_RIGHT_CB},
 MENU_END
 };
 
 // #endregion
 
-// #region Menumode main menu tree callbacks
+// #region Menumode main menu tree callbacks (unsorted)
 
 /*
 #########################################################################################
 ##                                                                                     ##
-##   Menumode main menu tree callbacks                                                 ##
+##   Menumode main menu tree callbacks (unsorted)                                      ##
 ##                                                                                     ##
 #########################################################################################
 */
 
 void menu_cb_10(void){
 
-    // Change menu entry for wifi: Show if on/off
+    if (!device.debug_mode){
+        dogm204_print_screen(not_in_debug_msg);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
 }
 void menu_cb_11(void){
 
@@ -2014,51 +2253,155 @@ void menu_cb_12(void){
 }
 void menu_cb_13(void){
 
+    // Turn wifi on/off
+    uint8_t wifi_state = get_wifi_enabled_state();
+    set_wifi_enabled_state((wifi_state == 0));
+    // Inform user
+    if (wifi_state){
+        dogm204_print_screen(wifi_off_ctrl_msg);
+        memcpy(wifi_main_menu[2].entry_text + 6,"OFF",3);   // without string terminator
+    }
+    else{
+        dogm204_print_screen(wifi_on_ctrl_msg);
+        memcpy(wifi_main_menu[2].entry_text + 6, "ON ",3);  // without string terminator
+    }
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    // Print menu again, because entry text changed
+    menu_mode_print_at_cursor_pos();
 }
 void menu_cb_14(void){
 
+    // Delete chat history of the current model
+    switch (UI.current_ai_model){
+        case AI_MODEL_OPENAI:
+            openai_delete_chats();
+            dogm204_print_screen(deleted_chats_msg);
+            break;
+        case AI_MODEL_GEMINI:
+            dogm204_print_screen(ai_model_not_supported_msg);
+            break;
+        case AI_MODEL_CLAUDE:
+            dogm204_print_screen(ai_model_not_supported_msg);
+            break;
+    }
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_15(void){
 
+    // Enter Fileview mode
 }
 void menu_cb_16(void){
 
+    // Display warning about configuring the UI unlock code
+    dogm204_print_screen(ui_unlck_code_change_warning_msg1);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    dogm204_print_screen(ui_unlck_code_change_warning_msg2);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_17(void){
 
+    // Build the display_contr_set_menu[] upon entering
+    snprintf(display_contr_set_menu[0].entry_text,
+            sizeof(display_contr_set_menu[0].entry_text),
+            "Sidedisplay: %3u   ",
+            device.side_display_contrast);
+    snprintf(display_contr_set_menu[1].entry_text,
+            sizeof(display_contr_set_menu[1].entry_text),
+            "Maindisplay: %3u   ",
+            device.main_display_contrast);
 }
 void menu_cb_18(void){
 
+    // Print device information (Name, HWv, SWv, Status...)
+    dogm204_print_screen(device_info1);
+    vTaskDelay(pdMS_TO_TICKS(1500));
+    dogm204_print_screen(device_info2);
+    vTaskDelay(pdMS_TO_TICKS(1500));
+    snprintf(debug_status,sizeof(debug_status),"Debuggingmode:%-1u     ",(device.debug_mode!=0));
+    dogm204_print_screen(device_info3);
+    vTaskDelay(pdMS_TO_TICKS(1500));
+    dogm204_print_screen(device_info4);
+    vTaskDelay(pdMS_TO_TICKS(1500));
+    dogm204_print_screen(device_info5);
+    vTaskDelay(pdMS_TO_TICKS(1500));
 }
 void menu_cb_19(void){
+
+    dogm204_print_screen(factory_rst_warning1);
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    dogm204_print_screen(factory_rst_warning2);
+    vTaskDelay(pdMS_TO_TICKS(2000));
 
 }
 void menu_cb_20(void){
 
+    // If debugging mode off, open confirm menu to enter, if on -> leave
+    if (device.debug_mode){
+        dogm204_print_screen(leave_debug_question_msg);
+    }
+    else{
+        dogm204_print_screen(enter_debug_question_msg);
+    }
+    vTaskDelay(pdMS_TO_TICKS(2000));
 }
 void menu_cb_21(void){
 
+    // Print battery info, only in debug mode
+    if (device.debug_mode){
+        char line1[MAIN_DISPLAY_COLUMNS+1];
+        char line2[MAIN_DISPLAY_COLUMNS+1];
+        char line3[MAIN_DISPLAY_COLUMNS+1];
+        char line4[MAIN_DISPLAY_COLUMNS+1];
+        char* new_screen[MAIN_DISPLAY_ROWS] = {line1,line2,line3,line4};
+        create_bms_info_screen(new_screen);
+        dogm204_print_screen(new_screen);
+    }
+    else{
+        dogm204_print_screen(not_in_debug_msg);
+    }
+    vTaskDelay(pdMS_TO_TICKS(2000));
 }
 void menu_cb_22(void){
 
+    UI.current_ai_model = AI_MODEL_OPENAI;
+    dogm204_print_screen(changed_ai_model_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_23(void){
 
+    UI.current_ai_model = AI_MODEL_GEMINI;
+    dogm204_print_screen(changed_ai_model_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_24(void){
 
+    UI.current_ai_model = AI_MODEL_CLAUDE;
+    dogm204_print_screen(changed_ai_model_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_25(void){
 
+    strcpy(UI.openai_model_version,"gpt-5.5");
+    dogm204_print_screen(changed_ai_model_ver_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_26(void){
 
+    strcpy(UI.openai_model_version,"gpt-5.6");
+    dogm204_print_screen(changed_ai_model_ver_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_27(void){
 
+    strcpy(UI.openai_model_version,"gpt-5.6-luna");
+    dogm204_print_screen(changed_ai_model_ver_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_28(void){
 
+    strcpy(UI.openai_model_version,"gpt-5.6-terra");
+    dogm204_print_screen(changed_ai_model_ver_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_29(void){
 
@@ -2086,53 +2429,204 @@ void menu_cb_31(void){
 }
 void menu_cb_32(void){
 
+    // Check if Wif is on, change wifi_main_menu[] to inform user
+    if (get_wifi_enabled_state()){
+        memcpy(wifi_main_menu[2].entry_text + 6, "ON ",3);
+    }
+    else{
+        memcpy(wifi_main_menu[2].entry_text + 6,"OFF",3);   // without string terminator
+    }
 }
 void menu_cb_33(void){
 
+    // Toggle autooff timer on/off
+    if (!UI.autooff_tresh_mins){
+        UI.autooff_tresh_mins = UI_DEFAULT_AUTOOFFMINS;
+        memcpy(autooff_settings_menu[0].entry_text + 7,"ON ",3);
+        snprintf(autooff_settings_menu[1].entry_text,sizeof(autooff_settings_menu[1].entry_text),"Set to %3u min     ",UI.autooff_tresh_mins); 
+    }
+    else{
+        UI.autooff_tresh_mins = 0;
+        // autooff turned off
+        memcpy(autooff_settings_menu[0].entry_text + 7,"OFF",3);   // without string terminator
+        // show - - -  mins
+        memcpy(autooff_settings_menu[1].entry_text + 7, "---",3);
+    }
+    // Print menu again, because entry text changed
+    menu_mode_print_at_cursor_pos();
 }
 void menu_cb_34(void){
 
+    // Decrease autooff timer
+    if (UI.autooff_tresh_mins > 1){
+        UI.autooff_tresh_mins--;
+    }
+    snprintf(autooff_settings_menu[1].entry_text,sizeof(autooff_settings_menu[1].entry_text),"Set to %3u min     ",UI.autooff_tresh_mins);
+    // Print menu again, because entry text changed
+    menu_mode_print_at_cursor_pos();
 }
 void menu_cb_35(void){
 
+    // Increase autooff timer
+    if (UI.autooff_tresh_mins < 255){
+        UI.autooff_tresh_mins++;
+    }
+    snprintf(autooff_settings_menu[1].entry_text,sizeof(autooff_settings_menu[1].entry_text),"Set to %3u min     ",UI.autooff_tresh_mins);
+    // Print menu again, because entry text changed
+    menu_mode_print_at_cursor_pos();
 }
 void menu_cb_36(void){
 
+    // Enter textinputmode to change UI-Unlock code
+    enter_textinput_mode(&enter_unlock_page);
+    UI.UI_mode = UI_MODE_TEXTINPUT;
+    print_textinput_page_at_cursor();
 }
 void menu_cb_37(void){
 
+    // Sidedisplay contrast down
+    device.side_display_contrast = (device.side_display_contrast >= SIDEDISPLAY_CONTRAST_INTERVAL)
+                                    ?
+                                    (device.side_display_contrast - SIDEDISPLAY_CONTRAST_INTERVAL)
+                                    :
+                                    0;
+    dep128064_set_contrast(device.side_display_contrast);
+    snprintf(display_contr_set_menu[0].entry_text,
+        sizeof(display_contr_set_menu[0].entry_text),
+        "Sidedisplay: %3u   ",
+        device.side_display_contrast);
+    menu_mode_print_at_cursor_pos();
 }
 void menu_cb_38(void){
 
+    // Sidedisplay contrast up
+    device.side_display_contrast = (device.side_display_contrast <= (SIDEDISPLAY_MAX_CONTRAST-SIDEDISPLAY_CONTRAST_INTERVAL))
+                                    ?
+                                    (device.side_display_contrast + SIDEDISPLAY_CONTRAST_INTERVAL)
+                                    :
+                                    SIDEDISPLAY_MAX_CONTRAST;
+    dep128064_set_contrast(device.side_display_contrast);
+    snprintf(display_contr_set_menu[0].entry_text,
+        sizeof(display_contr_set_menu[0].entry_text),
+        "Sidedisplay: %3u   ",
+        device.side_display_contrast);
+    menu_mode_print_at_cursor_pos();
 }
 void menu_cb_39(void){
+
+    // Maindisplay contrast down
+    device.main_display_contrast = (device.main_display_contrast >= MAINDISPLAY_CONTRAST_INTERVAL)
+                                    ?
+                                    (device.main_display_contrast - MAINDISPLAY_CONTRAST_INTERVAL)
+                                    :
+                                    0;
+    dogm204_set_contrast(device.main_display_contrast);
+    snprintf(display_contr_set_menu[1].entry_text,
+            sizeof(display_contr_set_menu[1].entry_text),
+            "Maindisplay: %3u   ",
+            device.main_display_contrast);
+    menu_mode_print_at_cursor_pos();
 
 }
 void menu_cb_40(void){
 
+    // Maindisplay contrast up
+    device.main_display_contrast = (device.main_display_contrast <= MAINDISPLAY_MAX_CONTRAST-MAINDISPLAY_CONTRAST_INTERVAL)
+                                    ?
+                                    (device.main_display_contrast + MAINDISPLAY_CONTRAST_INTERVAL)
+                                    :
+                                    MAINDISPLAY_MAX_CONTRAST;
+    dogm204_set_contrast(device.main_display_contrast);
+    snprintf(display_contr_set_menu[1].entry_text,
+            sizeof(display_contr_set_menu[1].entry_text),
+            "Maindisplay: %3u   ",
+            device.main_display_contrast);
+    menu_mode_print_at_cursor_pos();
 }
 void menu_cb_41(void){
 
+    // Decrease JPG quality (lower -> better)
+    uint8_t prev_jpg_qlty = camera_get_jpg_quality();
+    if (prev_jpg_qlty > 0){
+        prev_jpg_qlty--;
+        camera_set_jpeg_quality(prev_jpg_qlty);
+    }
+    snprintf(camera_settings_menu[1].entry_text,
+            sizeof(camera_settings_menu[1].entry_text),
+            "JPG Quality: %3u   ",
+            prev_jpg_qlty);
+    // Menu has changed
+    menu_mode_print_at_cursor_pos();
 }
 void menu_cb_42(void){
 
+    // Increase JPG qlty value (higher -> worse quality)
+    uint8_t prev_jpg_qlty = camera_get_jpg_quality();
+    if (prev_jpg_qlty < CAMERA_MAX_JPG_QLTY){
+        prev_jpg_qlty++;
+        camera_set_jpeg_quality(prev_jpg_qlty);
+    }
+    snprintf(camera_settings_menu[1].entry_text,
+            sizeof(camera_settings_menu[1].entry_text),
+            "JPG Quality: %3u   ",
+            prev_jpg_qlty);
+    // Menu has changed
+    menu_mode_print_at_cursor_pos();
 }
 void menu_cb_43(void){
 
+    // Delete camera directory
+    delete_camera_directory();
+    get_saved_pics(&UI.cam_img_cnt);
+    dogm204_print_screen(deleted_imgs_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_44(void){
 
+    camera_set_framesize(VGA_640_480_PX);
+    dogm204_print_screen(changed_framesize_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_45(void){
 
+    camera_set_framesize(XGA_1024_768_PX);
+    dogm204_print_screen(changed_framesize_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_46(void){
 
+    camera_set_framesize(UXGA_1600_1200_PX);
+    dogm204_print_screen(changed_framesize_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_47(void){
 
+    camera_set_framesize(QSXGA_2560_1920_PX);
+    dogm204_print_screen(changed_framesize_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 }
 void menu_cb_48(void){
+
+    // Perform a factory reset
+    dogm204_start_loading_screen(" Erasing flash      ",150);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    // Erase NVS partition (Wifi credentials, API Keys, parts of chatdata, UI settings, Device settings, Camera settings...)
+    nvs_flash_erase();
+    // Erase LittleFS partition (saved chats, images, transfered files)
+    esp_vfs_littlefs_unregister("littlefs");
+    const esp_partition_t *partition = esp_partition_find_first(
+        ESP_PARTITION_TYPE_DATA,
+        ESP_PARTITION_SUBTYPE_DATA_LITTLEFS,
+        "storage"
+    );
+    if (partition != NULL) {
+        esp_partition_erase_range(partition, 0, partition->size);
+    }
+    dogm204_end_loading_screen();
+    dogm204_print_screen(flash_erased_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    // Restarting device
+    esp_restart();
 
 }
 void menu_cb_49(void){
@@ -2156,9 +2650,74 @@ void menu_cb_50(void){
     }
     vTaskDelay(pdMS_TO_TICKS(1000));
 }
+void menu_cb_51(void){
+
+    // Construct menu 'autooff_settings_menu[]' upon entering
+    if (UI.autooff_tresh_mins == 0){
+        // autooff turned off
+        memcpy(autooff_settings_menu[0].entry_text + 7,"OFF",3);
+        // show - - -  mins
+        memcpy(autooff_settings_menu[1].entry_text + 7, "---",3);
+    }
+    else{
+        memcpy(autooff_settings_menu[0].entry_text + 7,"ON ",3);
+        snprintf(autooff_settings_menu[1].entry_text,sizeof(autooff_settings_menu[1].entry_text),"Set to %3u min     ",UI.autooff_tresh_mins); 
+    }
+}
+void menu_cb_52(void){
+
+    // Let user type in a new device name
+    enter_textinput_mode(&enter_name_page);
+    UI.UI_mode = UI_MODE_TEXTINPUT;
+    print_textinput_page_at_cursor();
+}
+void menu_cb_53(void){
+
+    // Construct a text entry in device_main_menu[] (debug mode)
+    if (device.debug_mode){
+        memcpy(device_main_menu[4].entry_text,"Leave",5);
+    }
+    else{
+        memcpy(device_main_menu[4].entry_text,"Enter",5);
+    }
+}
+void menu_cb_54(void){
+
+    // Toggle debugging mode
+    device.debug_mode = (device.debug_mode == 0);
+    // Refresh menu
+    if (device.debug_mode){
+        memcpy(device_main_menu[4].entry_text,"Leave",5);
+        dogm204_print_screen(entered_debug_msg);
+    }
+    else{
+        memcpy(device_main_menu[4].entry_text,"Enter",5);
+        dogm204_print_screen(left_debug_msg);
+    }
+    vTaskDelay(pdMS_TO_TICKS(1000));
+}
+void menu_cb_55(void){
+
+    // Construct camera_settings_menu[]
+    snprintf(camera_settings_menu[1].entry_text,
+            sizeof(camera_settings_menu[1].entry_text),
+            "JPG Quality: %3u   ",
+            camera_get_jpg_quality());
+}
+void menu_cb_56(void){
+
+    UI.delete_imgs_after_sending = 1;
+    dogm204_print_screen(changed_setting_generic_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+}
+void menu_cb_57(void){
+
+    UI.delete_imgs_after_sending = 0;
+    dogm204_print_screen(changed_setting_generic_msg);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+}
 
 // #endregion
-
 
 // #region Fileviewmode static functions
 

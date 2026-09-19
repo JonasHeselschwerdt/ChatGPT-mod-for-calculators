@@ -16,6 +16,7 @@ device.h: Hardware settings
 
 #include "driver/i2c_master.h"
 
+#include "AI_calc_maindisplay.h"
 
 
 
@@ -23,20 +24,20 @@ device.h: Hardware settings
 // Device Typedef, used to store settings and information related to the hardware
 
 typedef struct{
-    uint8_t debug_mode;                 // boolean
+    uint8_t debug_mode;                 // boolean, toggles debug informations and activates experimental features
     uint8_t main_display_contrast;      // 0...63
     uint8_t side_display_contrast;      // 0...255
     uint8_t side_display_on;            // boolean, if 0: all dep128064_print() commands are disabled
-    char name[32];                      // not used atm
+    char name[MAIN_DISPLAY_COLUMNS+1];
 }device_TypeDef;
 
 // Default settings (get loaded if NVS fails)
 
 #define DEVICE_DEFAULT_DEBUG 0
-#define DEVICE_DEFAULT_MAINDIS_CONTR 50
+#define DEVICE_DEFAULT_MAINDIS_CONTR 51
 #define DEVICE_DEFAULT_SIDEDIS_CONTR 200
 #define DEVICE_DEFAULT_SIDEDIS_ON 0
-#define DEVICE_DEFAULT_NAME "AIcalcFX87/991_HW201_SW200_Test"
+#define DEVICE_DEFAULT_NAME "AI-CalcFX87/991_P   "
 #define DEVICE_DEFAULT_JPG_QLTY 6
 #define DEVICE_DEFAULT_FRAMESIZE QSXGA_2560_1920_PX
 

@@ -88,12 +88,16 @@ static esp_err_t evaluate_AP_scan(wifi_ap_record_t** found_APs, uint16_t* found_
 
 static void wifi_nvs_init(void){
 
-    // NVS used to save SSID-Password pairs (up to WIFI_MAX_STORED_LOGINDATA)
     // Open namespace 'wifi'
     ESP_ERROR_CHECK(nvs_open("wifi", NVS_READWRITE, &wifi_ssid_pass_handle));
     wifi_manager.prefered_wifi_exists = 0;  // Always the case upon restart
+    // Load wifi credentials
     for (uint8_t i=0; i<WIFI_MAX_STORED_LOGINDATA; i++){
         wifi_load_login(&login_data[i],i);
+    }
+    // Load enabled state
+    if (nvs_get_u8(wifi_ssid_pass_handle,"enabled_state",&wifi_manager.enabled) != ESP_OK){
+        wifi_manager.enabled = WIFI_ENABLED_DEFAULT;
     }
     
 }
@@ -112,11 +116,17 @@ static void wifi_manager_task(void* arg){
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL, NULL));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_event_handler, NULL, NULL));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_start());
+    if (wifi_manager.enabled){
+        ESP_ERROR_CHECK(esp_wifi_start());
+    }
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
     // Forms a state machine together with wifi_event_handler()
     while(1){
         //ESP_LOGI("Wifi Task","Task loop beginning");
+        if (!wifi_manager.enabled){
+            vTaskDelay(pdMS_TO_TICKS(WIFI_ENABLED_AGAIN_CHECK_INTERVAL));
+            continue;
+        }
         if (!wifi_manager.connected){
             // Try to connect to wifi
             if (!wifi_manager.scanning && !wifi_manager.scan_done){
@@ -416,4 +426,26 @@ esp_err_t get_wifi_ssid(uint8_t login_index, char* ssid, size_t ssid_len_max){
     return ESP_OK;
 }
 
+uint8_t get_wifi_enabled_state(void){
+
+    // Getter fucntion for UI information
+    return wifi_manager.enabled;
+}
+
+void set_wifi_enabled_state(uint8_t enable){
+
+    if (!enable){
+        // save state:
+        wifi_manager.enabled = 0;
+        nvs_set_u8(wifi_ssid_pass_handle,"enabled_state",0);
+        // turn off
+        esp_wifi_disconnect();
+        esp_wifi_stop();
+    }
+    else{
+        wifi_manager.enabled = 1;
+        nvs_set_u8(wifi_ssid_pass_handle,"enabled_state",1);
+        esp_wifi_start();
+    }
+}
 // #endregion

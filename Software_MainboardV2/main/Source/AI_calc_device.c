@@ -48,10 +48,10 @@ device.c: GPIO, I2C, and other connectivity
 */
 
 char* shutdown_text[MAIN_DISPLAY_ROWS] = {
-    "====================",
+    STYLE_LINE,
     "  Device is         ",
     "  shutting down     ",
-    "===================="
+    STYLE_LINE
 };
 
 static nvs_handle_t device_settings_handle;

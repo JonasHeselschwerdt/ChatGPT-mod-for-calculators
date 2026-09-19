@@ -147,11 +147,25 @@ maindisplay.h: Settings for main display (DOGM204 text LCD)
 
 // Useful strings 
 
-#define EMPTY_LINE "                    "       // same length as MAIN_DISPLAY_COLUMNS
+#define EMPTY_LINE empty_line                   // same length as MAIN_DISPLAY_COLUMNS
+#define STYLE_LINE style_line_equal_sign        // same length as MAIN_DISPLAY_COLUMNS
 
 
 
 
+
+// Settings
+
+#define MAINDISPLAY_CONTRAST_INTERVAL 3
+#define MAINDISPLAY_MAX_CONTRAST 63
+
+
+
+
+// Extern variables
+
+extern char empty_line[MAIN_DISPLAY_COLUMNS+1];
+extern char style_line_equal_sign[MAIN_DISPLAY_COLUMNS+1];
 
 
 

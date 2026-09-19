@@ -26,9 +26,12 @@ network.h: Wifi manager settings
 #define WIFI_STILL_CONNECTED_CHECK_INTERVAL 5000        // in ms
 
 
-#define WIFI_MAX_STORED_LOGINDATA 16         // SSID + Password pairs
+#define WIFI_MAX_STORED_LOGINDATA 16                    // SSID + Password pairs
 #define WIFI_MAX_SSID_LENGTH 32
 #define WIFI_MAX_PASSW_LENGTH 64
+
+#define WIFI_ENABLED_DEFAULT 0                          // off by default
+#define WIFI_ENABLED_AGAIN_CHECK_INTERVAL 2000          // in ms
 
 
 
@@ -48,6 +51,7 @@ typedef struct{
 // Wifi manager typedef
 
 typedef struct {
+    uint8_t enabled;                            // boolean
     uint8_t connected;                          // boolean
     uint8_t scanning;                           // boolean
     uint8_t scan_done;                          // boolean
@@ -72,6 +76,7 @@ esp_err_t wifi_add_login_credentials(char* new_ssid,char* new_pass, uint8_t inde
 esp_err_t wifi_set_prefered_wifi(uint8_t index);
 void get_wifi_state(wifi_manager_TypeDef* wifi);
 esp_err_t get_wifi_ssid(uint8_t login_index, char* ssid, size_t ssid_len_max);
-
+void set_wifi_enabled_state(uint8_t enable);
+uint8_t get_wifi_enabled_state(void);
 
 #endif

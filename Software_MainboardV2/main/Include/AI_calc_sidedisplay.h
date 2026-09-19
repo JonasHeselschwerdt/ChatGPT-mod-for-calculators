@@ -34,6 +34,11 @@ of https://github.com/olikraus/u8g2 into components/u8g2
 
 
 
+// Settings
+
+#define SIDEDISPLAY_CONTRAST_INTERVAL 5
+#define SIDEDISPLAY_MAX_CONTRAST 255
+
 
 // DEP128064 Commands and Bitmasks for commands
 // Commands that are only used once during init are not specifically defined

@@ -206,8 +206,8 @@ typedef struct{
 // Extern variables
 
 extern Key_TypeDef no_key;
-
-
+extern char calculatormode_allowed_keys[];
+extern size_t allowed_key_amount;
 
 
 
