@@ -1,0 +1,143 @@
+(footprint "TR_Membrantastfeld"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "Ref**"
+		(at 2.9 0 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "ceca3e3f-aa65-4b6f-8847-8f96c07644de")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.16)
+			)
+		)
+	)
+	(property "Value" "TR_Membrantastfeld"
+		(at 0 1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "0c43b09f-0d94-49b5-9973-d660545fd8d9")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "8f43674f-b738-4b53-b7fd-b32741c9b38f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "b88a8319-1ea3-4f4f-a50c-e420211357ed")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_arc
+		(start 2.822662 1.016159)
+		(mid -2.999787 -0.035707)
+		(end 2.84605 -0.948683)
+		(stroke
+			(width 0.16)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "5cc53da9-5b1a-449d-b715-e1f35dc5deb7")
+	)
+	(fp_circle
+		(center 0 0)
+		(end 0 -3.25)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "c10b66fb-64e3-4d43-a2e0-0ea3df0012c0")
+	)
+	(fp_text user "${REFERENCE}"
+		(at -0.000001 -0.4 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "0273c52e-35a0-4498-a9d6-eec62084cf22")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd custom
+		(at -0.1 1.6)
+		(size 1.08744 1.08744)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(zone_connect 2)
+		(thermal_bridge_angle 90)
+		(options
+			(clearance convexhull)
+			(anchor circle)
+		)
+		(primitives
+			(gr_poly
+				(pts
+					(arc
+						(start -2.304738 -0.712738)
+						(mid 0.093205 0.963192)
+						(end 2.5 -0.7)
+					)
+				)
+				(width 0)
+				(fill yes)
+			)
+		)
+		(uuid "5ed9b945-ccdd-4a5b-9bfe-502e8a90ea71")
+	)
+	(pad "2" smd custom
+		(at -0.000001 -1.8)
+		(size 1.08744 1.08744)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(zone_connect 2)
+		(thermal_bridge_angle 90)
+		(options
+			(clearance convexhull)
+			(anchor circle)
+		)
+		(primitives
+			(gr_poly
+				(pts
+					(xy 2.439262 0.9)
+					(arc
+						(start -2.439261 0.9)
+						(mid 0 -0.799999)
+						(end 2.439261 0.9)
+					)
+				)
+				(width 0)
+				(fill yes)
+			)
+		)
+		(uuid "79291ea7-dc8b-4a92-9121-4b316dc8c54d")
+	)
+	(embedded_fonts no)
+)

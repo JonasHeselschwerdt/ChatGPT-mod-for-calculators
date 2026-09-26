@@ -92,9 +92,11 @@ Initial version:
 - More infos: fixes_v2_0_1_documentation.md
 - Replaced FPC connector link in BOM
 
-# Future plans for the device (To-Do List)
+## Version 2.0.2 (newest)
 
-- Cleaning up code
-- Adding the camera into the UI
-- Adding the side display into the UI
-- Changing the key mapping to be more similar to normal PC keyboards
+- Software compatible to V2.0.1
+- Removed JP6:9, no longer necessary
+- Routing changes to Mainboard and UI-Board
+- Improved User extension interface to be easier to use
+- Added some empty space near user extension interface for further extensions
+- Added Kicad template project for user extension board
