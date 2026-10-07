@@ -3,7 +3,7 @@
 ChatGPT Hardware Hack for calculators: Software V2
 
 © 2026 Jonas Heselschwerdt
-Licensed under CC BY-NC 4.0
+Licensed under GPLv3
 
 maindisplay.h: Functions and variables to control the DOGM204 text LCD via I2C
 

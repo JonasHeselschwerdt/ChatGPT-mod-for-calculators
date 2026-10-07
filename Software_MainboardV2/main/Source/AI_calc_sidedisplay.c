@@ -3,7 +3,7 @@
 ChatGPT Hardware Hack for calculators: Software V2
 
 © 2026 Jonas Heselschwerdt
-Licensed under CC BY-NC 4.0
+Licensed under GPLv3 
 
 sidedisplay.h: Functions and variables to control the OLED screen (using U8G2 and Lopaka)
 

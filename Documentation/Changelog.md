@@ -32,6 +32,26 @@ Improvements:
 
 Note: A text transfer tool to upload texts to the device was added
 
+## Version 2.0.0
+
+- Changed maindisplay driver functions
+- Added U8G2 based sidedisplay driver module
+- Added batterymanagement module
+- Changed keypad driver functions
+- Added ESP-camera based camera module
+- Switched to OpenAI responses API (supports newer models, supports conversations up to 20 responses long)
+- Added abiltiy to render equations (needs external python server)
+- Added abiltiy to send JPGs to OpenAI responses API
+- Increased WIFI credentials storage to 16 WIFIs
+- Added new UI-mode: Textinputmode
+- Changed Menumode, Scribblemode, Chatviewmode and Calculatormode (previously called 'stealth mode')
+- Removed Fileviewmode
+- Removed USB Keypadmode
+- Changed unlock method from secret key-combination to (user-configurable) UI-unlock code
+- Added a device name variable (user-configurable)
+- Added a debug mode that enables experimental settings and debug messages
+
+
 # Changelog - HTML local network hosting tool (text transfer tool)
 
 ## Version 1.0.0
@@ -92,7 +112,7 @@ Initial version:
 - More infos: fixes_v2_0_1_documentation.md
 - Replaced FPC connector link in BOM
 
-## Version 2.0.2 (newest)
+## Version 2.0.2
 
 - Software compatible to V2.0.1
 - Removed JP6:9, no longer necessary
@@ -100,3 +120,9 @@ Initial version:
 - Improved User extension interface to be easier to use
 - Added some empty space near user extension interface for further extensions
 - Added Kicad template project for user extension board
+
+## Version 2.0.3 (small fixes)
+
+- Corrected Pitch of SW1 on mainboard to 1.27mm
+- Corrected Edge-Cuts outline of UI-Board to not collide with front case anymore
+- Cleaned up footprint library

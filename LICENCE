@@ -1,15 +1,18 @@
-Creative Commons Attribution-NonCommercial 4.0 International
-(CC BY-NC 4.0)
+This repositoy contains both hardware, software and documentation components.
+Since hardware v2.0.3 and software v2.0.0 these components are licenced
+seperately:
 
-© 2026 Jonas Heselschwerdt
+Software:
+GNU General Public License v3.0 (GPL-3.0)
+See LICENCE-SOFTWARE.
 
-You are free to:
-- Share — copy and redistribute the material
-- Adapt — remix, transform, and build upon the material
+Hardware:
+CERN Open Hardware Licence (strongly-reciprocal) Version 2.0
+See LICENCE-HARDWARE.
 
-Under the following terms:
-- Attribution — You must give appropriate credit.
-- NonCommercial — You may not use the material for commercial purposes.
+Documentation:
+CERN Open Hardware Licence (strongly-reciprocal) Version 2.0
+See LICENCE-HARDWARE
 
-Full license text:
-https://creativecommons.org/licenses/by-nc/4.0/
+The previous versions of software, hardware and documentation are licenced
+under the CC-BY-NC 4.0 Licence. (Full licence text: https://creativecommons.org/licenses/by-nc/4.0/)
