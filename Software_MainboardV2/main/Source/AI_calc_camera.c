@@ -317,9 +317,9 @@ esp_err_t camera_take_picture(void){
     vTaskDelay(pdMS_TO_TICKS(100));
     if (!pic){
         // Frame capture error, deinit camera and shutdown camera
-        ESP_LOGI("Camera","Frame capture error, shutting camera down");
+        // ESP_LOGI("Camera","Frame capture error, shutting camera down");
         // PSRAM DMA does not appear to work with JPEGs (struggles to find SOI & EOI):
-        ESP_LOGI("Camera","Try turning off CONFIG_CAMERA_PSRAM_DMA through menuconfig");
+        // ESP_LOGI("Camera","Try turning off CONFIG_CAMERA_PSRAM_DMA through menuconfig");
         esp_camera_deinit();
         vTaskDelay(pdMS_TO_TICKS(100));
         gpio_set_level(CAMERA_POWER_ENABLE,0);
@@ -330,7 +330,7 @@ esp_err_t camera_take_picture(void){
     size_t cam_dir_size;
     uint8_t pictures_cnt;
     if (camera_directory_get_size(&cam_dir_size,&pictures_cnt) != ESP_OK){
-        ESP_LOGI("Camera","Error in littleFS cam directory?");
+        // ESP_LOGI("Camera","Error in littleFS cam directory?");
         esp_camera_fb_return(pic);
         esp_camera_deinit();
         vTaskDelay(pdMS_TO_TICKS(100));
@@ -341,7 +341,7 @@ esp_err_t camera_take_picture(void){
     // First Check if there is enough space in flash
     if (((pic->len + cam_dir_size) >= PICTURES_MAX_TOTAL_SIZE) || (pictures_cnt >= MAX_SAVED_PICTURES)){
         // Flash memory full
-        ESP_LOGI("Camera","Not enough space any more in Flash");
+        // ESP_LOGI("Camera","Not enough space any more in Flash");
         esp_camera_fb_return(pic);
         esp_camera_deinit();
         vTaskDelay(pdMS_TO_TICKS(100));
@@ -354,7 +354,7 @@ esp_err_t camera_take_picture(void){
     snprintf(new_file_name,sizeof(new_file_name),"/littlefs/cam/camera[%03u].jpg",(pictures_cnt));
     FILE *f = fopen(new_file_name, "wb");     
     if (!f){
-        ESP_LOGI("Camera","LittleFS error, can't save picture");
+        // ESP_LOGI("Camera","LittleFS error, can't save picture");
         esp_camera_fb_return(pic);
         esp_camera_deinit();
         vTaskDelay(pdMS_TO_TICKS(100));
@@ -364,7 +364,7 @@ esp_err_t camera_take_picture(void){
     }
     size_t new_pic_size = fwrite(pic->buf, 1, pic->len, f);
     fclose(f);
-    ESP_LOGI("Camera", "Saved %zu / %zu bytes", new_pic_size, pic->len);
+    // ESP_LOGI("Camera", "Saved %zu / %zu bytes", new_pic_size, pic->len);
     // Deinit after successfull camera operation
     esp_camera_fb_return(pic);
     esp_camera_deinit();
@@ -465,7 +465,7 @@ void camera_start_debug_http_server(void){
     ESP_ERROR_CHECK(httpd_start(&camera_http_server, &config));
     ESP_ERROR_CHECK(httpd_register_uri_handler(camera_http_server,&camera_uri));
     ESP_ERROR_CHECK(httpd_register_uri_handler(camera_http_server,&camera_image_uri));
-    ESP_LOGI("Camera HTTP", "Server started");
+    // ESP_LOGI("Camera HTTP", "Server started");
 }
 
 // Only for debugging
@@ -474,7 +474,7 @@ void camera_end_debug_http_server(void){
     if (camera_http_server != NULL) {
         httpd_stop(camera_http_server);
         camera_http_server = NULL;
-        ESP_LOGI("Camera HTTP", "Server stopped");
+        // ESP_LOGI("Camera HTTP", "Server stopped");
     } 
 }
 

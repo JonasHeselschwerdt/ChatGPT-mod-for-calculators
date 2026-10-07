@@ -406,6 +406,7 @@ static void dogm204_define_custom_symbols(void){
     };
     MainDisplay_LUT[DOGM204_HALFHOLLOWBLOCK] = 0x01;
     dogm204_create_symbol(halfhollowblock_sign,MainDisplay_LUT[DOGM204_HALFHOLLOWBLOCK]);
+    // for battery info screen
     uint8_t battery_sign[8] = {
         0b00001110,                     //          0   0   0    
         0b00011011,                     //      0   0       0   0

@@ -317,11 +317,15 @@ void tca8418_gpo_set_level(uint16_t gpo_bitmask, uint8_t output_level){
 void tca8418_init_gpios(void){
 
     // TCA8418 GPIO Configuration
-    tca_gpio_TypeDef bms_alrt_pin = {BMS_ALRT,TCA_GPIO_INPUT,TCA_GPIO_PULLUP_DIS};
+
+    tca_gpio_TypeDef freegpio0_pin = {FREEGPIO_0,TCA_GPIO_INPUT,TCA_GPIO_PULLUP_EN};     // Part of user ext. interface
+
     tca_gpio_TypeDef bms_pg_pin = {BMS_PG,TCA_GPIO_INPUT,TCA_GPIO_PULLUP_DIS};
     tca_gpio_TypeDef bms_stat1_pin = {BMS_STAT1,TCA_GPIO_INPUT,TCA_GPIO_PULLUP_DIS};
     tca_gpio_TypeDef bms_stat2_pin = {BMS_STAT2,TCA_GPIO_INPUT,TCA_GPIO_PULLUP_DIS};
-    tca8418_gpio_set_mode(&bms_alrt_pin);
+
+    tca8418_gpio_set_mode(&freegpio0_pin);  // Part of user ext. interface
+
     tca8418_gpio_set_mode(&bms_pg_pin);
     tca8418_gpio_set_mode(&bms_stat1_pin);
     tca8418_gpio_set_mode(&bms_stat2_pin);
@@ -335,7 +339,7 @@ void update_pressed_keys(Key_TypeDef* cur_pressed_keys){
     uint8_t keypad_FIFO[10] = {0,0,0,0,0,0,0,0,0,0};
     tca8418_get_key_FIFO(keypad_FIFO);
     /*
-    ESP_LOGI("Debugging","KeypadFIFO 1:0x%x, 2:0x%x, 3:0x%x, 4:0x%x, 5:0x%x, 6:0x%x, 7:0x%x, 8:0x%x, 9:0x%x, 10:0x%x",
+    ESP_LOGI("Keypad FIFO","1:0x%x, 2:0x%x, 3:0x%x, 4:0x%x, 5:0x%x, 6:0x%x, 7:0x%x, 8:0x%x, 9:0x%x, 10:0x%x",
         keypad_FIFO[0],
         keypad_FIFO[1],
         keypad_FIFO[2],

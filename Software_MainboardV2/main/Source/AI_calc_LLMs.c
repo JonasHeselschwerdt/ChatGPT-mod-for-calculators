@@ -84,7 +84,7 @@ static nvs_handle_t responseID_handle;
 
 /*
 The instructions below get added to every prompt, I try to avoid OpenAI giving me responses that mess up 
-the display renderings this way. This is specifically important for equations.
+the display rendering this way. This is specifically important for equations.
 Equations get rendered on an ext. http server and sent back in XBM format for direct rendering.
 The ext. server uses Matplotlib for rendering, which cannot do all formatting specifiers:
 */
@@ -527,7 +527,7 @@ static esp_err_t openAI_http_post(const char* request_json,char** response_json)
     }
     char auth_header[API_KEY_MAX_LENGTH+8];
     snprintf(auth_header,sizeof(auth_header),"Bearer %s",API_key);
-    // ESP_LOGI("Test","API KEY:|%s|",auth_header);
+    // ESP_LOGI("API KEY:","|%s|",auth_header);
     ret = esp_http_client_set_header(client,"Authorization",auth_header);
     if (ret != ESP_OK){
         goto cleanup;
@@ -551,7 +551,7 @@ static esp_err_t openAI_http_post(const char* request_json,char** response_json)
     }
     *response_json = response.data;
     response.data = NULL;
-    ESP_LOGI("OpenAI","Received %u bytes",(unsigned)response.length);
+    // ESP_LOGI("OpenAI","Received %u bytes",(unsigned)response.length);
     // HTTP status
     int status_code = esp_http_client_get_status_code(client);
     if (status_code < 200 || status_code >= 300){
@@ -819,7 +819,6 @@ static uint8_t extract_equations_from_string(char* source_string){
     /* 
     for (uint8_t i=0; i<MAX_EQS_FOR_RENDERING; i++){
         ESP_LOGI("EQ-Extraction","EQ%u:|%s|",i,equations_buf[i]);
-        ESP_LOGI("EQ_Extraction","First sign:%c",equations_buf[i][0]);
     }
     */
     return found_eqs;
@@ -894,7 +893,7 @@ static void equation_render_http_post(char* req_json, ai_model_TypeDef model, ui
     }
     // Read HTTP response headers, check if the server messed something up:
     int content_length = esp_http_client_fetch_headers(client);
-    ESP_LOGI("EquationRendering", "Content length: %d", content_length);
+    // ESP_LOGI("EquationRendering", "Content length: %d", content_length);
     if (content_length <= 0){
         ESP_LOGE("EquationRendering", "Invalid content length");
         esp_http_client_close(client);
@@ -914,7 +913,7 @@ static void equation_render_http_post(char* req_json, ai_model_TypeDef model, ui
         esp_http_client_cleanup(client);
         return;
     }
-    ESP_LOGI("EquationRendering", "Receiving %u XBMs", xbm_count);
+    // ESP_LOGI("EquationRendering", "Receiving %u XBMs", xbm_count);
     // Start reading XBMs and saving them
     uint8_t buffer[BYTES_PER_XBM];
     for (uint16_t i = 0; i < xbm_count; i++){
@@ -951,7 +950,7 @@ static void equation_render_http_post(char* req_json, ai_model_TypeDef model, ui
             ESP_LOGE("EquationRendering","Failed to write complete XBM");
             break;
         }
-        ESP_LOGI("EquationRendering","Received XBM %u/%u",i + 1,xbm_count);
+        // ESP_LOGI("EquationRendering","Received XBM %u/%u",i + 1,xbm_count);
     }
 }
 
@@ -1050,11 +1049,11 @@ esp_err_t get_eq_rendering(ai_model_TypeDef model, uint16_t chatpos, uint8_t equ
     }
     FILE* f = fopen(filename,"rb");
     if (f == NULL){
-        ESP_LOGI("EQRender","Failed to load XBM @ %s",filename);
+        // ESP_LOGI("EQRender","Failed to load XBM @ %s",filename);
         return ESP_FAIL;
     }
     fread(buf,1,BYTES_PER_XBM,f);
-    ESP_LOGI("EQRender","Loaded XBM @ %s",filename);
+    // ESP_LOGI("EQRender","Loaded XBM @ %s",filename);
     fclose(f);
     return ESP_OK;
 }

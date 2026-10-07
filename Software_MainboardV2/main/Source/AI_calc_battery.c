@@ -186,7 +186,7 @@ static int32_t bms_ntc_millivolts_to_millidegrees(int millivolts){
     else{
         // Calculate R of NTC
         // NTC part of a Voltage divider (see schematics)
-        // Formula assumes GPIO HIGH Voltage = 3.3V
+        // Formula assumes GPIO HIGH Voltage = 3V
         ntc_r = (uint16_t)(((uint32_t)(millivolts*BMS_VOLTAGEDIV_R))/(GPIO_OUTPUT_HIGH_MV - millivolts));
     }
     // Calculate Temp out of R
@@ -239,7 +239,6 @@ static uint8_t bms_get_charger_state(void){
 
     // Read Status Outputs of MAX17048 and MCP73871
     uint8_t bms_state = 0;
-    bms_state |= tca8418_gpi_get_level(BMS_ALRT);   // not used, MAX17048 gets polled
     bms_state |= (tca8418_gpi_get_level(BMS_PG) << 1);
     bms_state |= (tca8418_gpi_get_level(BMS_STAT2) << 2);
     bms_state |= (tca8418_gpi_get_level(BMS_STAT1) << 3);

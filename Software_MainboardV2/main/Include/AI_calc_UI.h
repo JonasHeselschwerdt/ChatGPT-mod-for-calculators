@@ -13,7 +13,7 @@ UI.h: UI-Settings, Variable Types, extern Variables and Functions
 #define UI_H
 
 // UI version
-#define UI_VER_STRING "SWv2.0.0 for HWv2.0.1"
+#define UI_VER_STRING "SWv2.0.0 for HWv2.0.3"
 
 
 // Includes

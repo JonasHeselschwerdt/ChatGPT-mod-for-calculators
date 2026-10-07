@@ -76,12 +76,6 @@ static char* ui_unlock_msg[MAIN_DISPLAY_ROWS] = {
     "    Calculator UI   ",
     STYLE_LINE
 };
-static char* feature_missing_msg[MAIN_DISPLAY_ROWS] = {
-    STYLE_LINE,
-    "   This feature     ",
-    " is not implemented ",
-    STYLE_LINE
-};
 static char* ai_model_not_supported_msg[MAIN_DISPLAY_ROWS] = {
     STYLE_LINE,
     "  Please select a   ",
@@ -753,7 +747,7 @@ static esp_err_t UI_send_prompt(char* scribble_page_copy, char (*pictures)[64]){
             else{
                 get_openai_response(scribble_page_copy,answer_buf,sizeof(answer_buf),pictures,UI.openai_model_version);
             }
-            // ESP_LOGI("UI-Test","OpenAI response: %s", answer_buf);
+            // ESP_LOGI("UI-Prompt-Test","OpenAI response: %s", answer_buf);
             dogm204_end_loading_screen();
             return ESP_OK;
         case AI_MODEL_GEMINI:
@@ -1174,7 +1168,6 @@ static void handle_pressed_keys_scribble(Key_TypeDef* cur_pressed_keys){
         dogm204_display_control(DOGM204_CURSOR_OFF_BIT|DOGM204_CURSOR_NO_BLINK_BIT|DOGM204_DISPLAY_ON_BIT);
         dogm204_print_screen(taking_pic_msg);
         camera_take_picture();
-        // get_saved_pics(&UI.cam_img_cnt);
         dogm204_display_control(DOGM204_CURSOR_ON_BIT|DOGM204_CURSOR_BLINK_BIT|DOGM204_DISPLAY_ON_BIT);
     }
     else if (   
@@ -1509,7 +1502,7 @@ void textinput_cb_6(void){
 
     // Terminate string at the end of user input
     textinputmode.textinput_page[textinputmode.textinput_page_length] = '\0';
-    set_equation_render_server(textinputmode.textinput_page,sizeof(textinputmode.textinput_page),(get_eq_render_server_state()!=0));
+    set_equation_render_server(textinputmode.textinput_page,(strlen(textinputmode.textinput_page)+1),(get_eq_render_server_state()!=0));
     // Success screen
     dogm204_display_control(DOGM204_CURSOR_OFF_BIT|DOGM204_CURSOR_NO_BLINK_BIT|DOGM204_DISPLAY_ON_BIT);
     dogm204_print_screen(changed_eq_render_server_address_msg);
@@ -1550,7 +1543,7 @@ static void chatview_load_and_format_response(void){
 
     // Load the text exchange where the user is atm
     load_prev_openai_response(chatviewmode.current_chat_position,chatviewmode.response_page,sizeof(chatviewmode.response_page));
-    // ESP_LOGI("Test","Loaded response: %s",chatviewmode.response_page);
+    // ESP_LOGI("Chatviewmode","Loaded response: %s",chatviewmode.response_page);
     chatviewmode.current_item_section = 0;
     // Find out how big the loaded chat item is
     uint16_t cur_item_len = strlen(chatviewmode.response_page);
@@ -1576,7 +1569,7 @@ static void chatview_load_and_format_prompt(void){
 
     // Load text exchange prompt
     load_prev_openai_prompt(chatviewmode.current_chat_position,chatviewmode.prompt_page,sizeof(chatviewmode.prompt_page));
-    // ESP_LOGI("Test","Loaded prompt: %s",chatviewmode.prompt_page);
+    // ESP_LOGI("Chatviewmode","Loaded prompt: %s",chatviewmode.prompt_page);
     chatviewmode.current_item_section = 0;
     // Find out how big the loaded chat item is
     uint16_t cur_item_len = strlen(chatviewmode.prompt_page);
@@ -2004,7 +1997,6 @@ void menu_cb_3(void){
     // Delete camera directory afterwards
     if (UI.delete_imgs_after_sending){
         delete_camera_directory();
-        // get_saved_pics(&UI.cam_img_cnt);
     }
 }
 void menu_cb_4(void){
@@ -2057,7 +2049,6 @@ void menu_cb_5(void){
     char pictures[MAX_SAVED_PICTURES][64] = {0};
     // Delete image directory
     delete_camera_directory();
-    // get_saved_pics(&UI.cam_img_cnt);
     // Send prompt, go to chatview mode
     if (UI_send_prompt(scribble_page_copy,pictures) == ESP_OK){
         if (maybe_enter_chatview() != ESP_OK){
@@ -2136,7 +2127,7 @@ void menu_cb_9(void){
             text_exchanges = 0;     // not implemented yet
             break;
     }
-    // ESP_LOGI("Test","Textexchanges: %u",text_exchanges);
+    // ESP_LOGI("Textexchanges:","%u",text_exchanges);
     if ((text_exchanges == 0) || (text_exchanges >= (MAX_CONVERSATION_LENGTH-1))){
         pre_prompt_settings_menu[1] = (menu_entry_TypeDef)MENU_END;
     }
@@ -2335,7 +2326,7 @@ void menu_cb_11(void){
         if (get_wifi_ssid(i,wifis_edit_menu[i].entry_text,MAIN_DISPLAY_COLUMNS)!=ESP_OK){
             strcpy(wifis_edit_menu[i].entry_text,"Save new wifi here ");
         }
-        // ESP_LOGI("UI Test","Login %u: |%s|",i,wifis_edit_menu[i].entry_text);
+        // ESP_LOGI("Wifi Menu","Login %u: |%s|",i,wifis_edit_menu[i].entry_text);
         // Rest (Header etc.)
         strcpy(wifis_edit_menu[i].menu_title,"Edit a Wifi        ");
         wifis_edit_menu[i].menu_child = NO_CHILD;
@@ -2359,7 +2350,7 @@ void menu_cb_12(void){
         else{
             wifis_man_choose_menu[i].enter_callback = NO_ENTER_CB;
         }
-        // ESP_LOGI("UI Test","Login %u: |%s|",i,wifis_man_choose_menu[i].entry_text);
+        // ESP_LOGI("Wifi Menu","Login %u: |%s|",i,wifis_man_choose_menu[i].entry_text);
         // Rest (Header etc.)
         strcpy(wifis_man_choose_menu[i].menu_title,"Choose a Wifi      ");
         wifis_man_choose_menu[i].menu_child = NO_CHILD;
@@ -2696,7 +2687,6 @@ void menu_cb_43(void){
 
     // Delete camera directory
     delete_camera_directory();
-    // get_saved_pics(&UI.cam_img_cnt);
     dogm204_print_screen(deleted_imgs_msg);
     vTaskDelay(pdMS_TO_TICKS(1000));
 }
@@ -2922,7 +2912,7 @@ static void littleFS_init(void){
     }
     size_t total = 0, used = 0;
     esp_littlefs_info("littlefs", &total, &used);
-    ESP_LOGI("LFS", "LittleFS mounted: %d KB total, %d KB used", total / 1024, used / 1024);
+    // ESP_LOGI("LFS", "LittleFS mounted: %d KB total, %d KB used", total / 1024, used / 1024);
     // Create all neccessary directories if they are not there yet
     // To temporarily store JPGs:
     mkdir("/littlefs/cam",0755);

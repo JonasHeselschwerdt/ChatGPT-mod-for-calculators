@@ -174,11 +174,11 @@ static void free_gpios_init(void){
 
     // Not used by default, configure as Inputs with internal Pullups
     uint64_t freegpios = 0;
-    freegpios |= (1ULL << FREEGPIO_4);
     freegpios |= (1ULL << FREEGPIO_5);
-    freegpios |= (1ULL << FREEGPIO_6);
-    freegpios |= (1ULL << FREEGPIO_7);
-    freegpios |= (1ULL << FREEGPIO_8);
+    freegpios |= (1ULL << FREEGPIO_4);
+    freegpios |= (1ULL << FREEGPIO_3);
+    freegpios |= (1ULL << FREEGPIO_2);
+    freegpios |= (1ULL << FREEGPIO_1);
 
     gpio_config_t freegpio_config = {
         .pin_bit_mask = freegpios,

@@ -77,11 +77,11 @@ EFUSE_STRAP_JTAG_SEL = EFUSE_DIS_USB_JTAG = EFUSE_DIS_PAD_JTAG = 0
 This is the case by default, don't change these!
 */
  
-#define FREEGPIO_8 40
-#define FREEGPIO_7 41
-#define FREEGPIO_6 42
-#define FREEGPIO_5 43
-#define FREEGPIO_4 44
+#define FREEGPIO_5 40
+#define FREEGPIO_4 41
+#define FREEGPIO_3 42
+#define FREEGPIO_2 43
+#define FREEGPIO_1 44       // free GPIO 0 configured in keypad.c and keypad.h
 
 
 

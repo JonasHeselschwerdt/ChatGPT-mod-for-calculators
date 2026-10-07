@@ -86,10 +86,11 @@ keypad.h: Settings for TCA8418 implementation
 // Bit 15 of gpio_bitmask = 0 -> Bits 0:7 = Row 0:7 bitmask
 // Bit 15 of gpio_bitmask = 1 -> Bits 0:9 = Column 0:9 bitmask
 
-#define BMS_ALRT 0x8080     // or FREEGPIO_3
-#define BMS_PG 0x8100       // or FREEGPIO_2
-#define BMS_STAT1 0x8200    // or FREEGPIO_1
-#define BMS_STAT2 0x0080    // or FREEGPIO_0
+#define FREEGPIO_0 0x8080
+
+#define BMS_PG 0x8100
+#define BMS_STAT1 0x8200
+#define BMS_STAT2 0x0080
 
 
 
