@@ -6,11 +6,15 @@ There are two versions of hardware available. The second, newer version allows f
 
 This is an independent modification, I am not affiliated with Casio Computer Co.,Ltd. or Casio Europe GmbH in any way.
 
-Information about the hardware version v1 is provided in this video on my YouTube-channel:
+## Documentation of V2
+
+[![Linked Image](https://img.youtube.com/vi/zLtktpHgP-4/maxresdefault.jpg)](https://youtu.be/zLtktpHgP-4)
+
+## Documentation of V1
 
 [![Linked Image](https://img.youtube.com/vi/Xx7Nprghpbg/maxresdefault.jpg)](https://youtu.be/Xx7Nprghpbg)
 
-At the momemt, software for the hardware version v2 is in development, while the hardware designs are already released. The mainboard v2 and the UI-board v2 have been validated and are ready for programming.
+## Contact:
 
 If you find bugs in the firmware or you need help setting the device up you can contact me on Youtube, Instagram or here on Github.
 Of course I am open to suggestions and collaborations!
@@ -21,12 +25,3 @@ Instagram: @electrjonics
 
 
 © 2026 Jonas Heselschwerdt
-Licensed under CC BY-NC 4.0
-
-
-
-
-
-
-
-

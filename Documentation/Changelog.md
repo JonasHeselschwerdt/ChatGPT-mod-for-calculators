@@ -81,7 +81,7 @@ Initial version:
 
 - Fixed 'deadlock' issue of battery protection (see battery_prot_hotfix_v1_0_1.md)
 
-## Version 2.0.0
+## Version 2.0.0 (new codebase)
 
 - Split electronics into Mainboard and UI-Board, connected by 24 Pin FPC connector
 - Battery and USB-C connector connected via Molex Picoblade Connectors (instead of soldered on)
