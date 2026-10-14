@@ -3,7 +3,7 @@
 If you want to get your own copy of the mainboard and UI-Board I recommend JLCPCB
 as PCB manufacturer.
 
-To get the boards upload the Gerber files (one by one) as .zip on https://jlcpcb.com/ -> Get instant quote
+To get the boards upload the Gerber files (one by one) as .zip on https://jlcpcb.com/pcb-assembly?from=JUOLXLQL -> Get instant quote
 
 ## After that you can set some settings:
 
