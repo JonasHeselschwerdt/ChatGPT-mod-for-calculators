@@ -36,6 +36,7 @@ UI.c: UI-Functions and Variables
 #include "AI_calc_maindisplay.h"
 #include "AI_calc_sidedisplay.h"
 #include "AI_calc_main.h"
+#include "AI_calc_hardware_cc.h"
 
 // #endregion
 
@@ -2283,7 +2284,9 @@ menu_entry_TypeDef set_framesize_menu[] = {
 {"Set framesize      ",    "VGA_640_480_PX     ",  NO_CHILD,          camera_settings_menu,    menu_cb_44,     NO_LEFT_CB,     NO_RIGHT_CB},
 {"Set framesize      ",    "XGA_1024_768_PX    ",  NO_CHILD,          camera_settings_menu,    menu_cb_45,     NO_LEFT_CB,     NO_RIGHT_CB},
 {"Set framesize      ",    "UXGA_1600_1200_PX  ",  NO_CHILD,          camera_settings_menu,    menu_cb_46,     NO_LEFT_CB,     NO_RIGHT_CB},
-{"Set framesize      ",    "QSXGA_2560_1920_PX ",  NO_CHILD,          camera_settings_menu,    menu_cb_47,     NO_LEFT_CB,     NO_RIGHT_CB},
+#if defined (CC_CAMERA_USED_OV5640)
+    {"Set framesize      ",    "QSXGA_2560_1920_PX ",  NO_CHILD,          camera_settings_menu,    menu_cb_47,     NO_LEFT_CB,     NO_RIGHT_CB},
+#endif
 MENU_END
 };
 

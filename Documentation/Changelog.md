@@ -104,6 +104,11 @@ Initial version:
 
 ## Version 2.0.1
 
+- Added support for alternative (cheaper) camera OV3660
+- Added a hardware compile control file for device configuration before flashing
+
+## Version 2.0.1
+
 - Repurposed FreeGPIO9 to NTC-Voltage Divider activation Pin (FreeGPIO9 not available anymore)
 - Added Ability to monitor the battery cell temperature with the ESP32S3 ADC1 Channel 2 (GPIO 3)
 - Added a 100nF Capacitor from 3V3_Main_disable to make it less susceptible to noise

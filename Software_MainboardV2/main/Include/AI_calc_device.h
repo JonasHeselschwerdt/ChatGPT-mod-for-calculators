@@ -17,6 +17,7 @@ device.h: Hardware settings
 #include "driver/i2c_master.h"
 
 #include "AI_calc_maindisplay.h"
+#include "AI_calc_hardware_cc.h"
 
 
 
@@ -39,9 +40,12 @@ typedef struct{
 #define DEVICE_DEFAULT_SIDEDIS_ON 0
 #define DEVICE_DEFAULT_NAME "AI-CalcFX87/991_P   "
 #define DEVICE_DEFAULT_JPG_QLTY 6
-#define DEVICE_DEFAULT_FRAMESIZE QSXGA_2560_1920_PX
 
-
+#if defined (CC_CAMERA_USED_OV5640)
+    #define DEVICE_DEFAULT_FRAMESIZE QSXGA_2560_1920_PX
+#elif defined (CC_CAMERA_USED_OV3660)
+    #define DEVICE_DEFAULT_FRAMESIZE UXGA UXGA_1600_1200_PX
+#endif
 
 
 

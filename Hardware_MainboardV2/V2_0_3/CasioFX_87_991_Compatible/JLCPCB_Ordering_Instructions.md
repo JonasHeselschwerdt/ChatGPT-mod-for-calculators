@@ -11,7 +11,13 @@ To get the boards upload the Gerber files (one by one) as .zip on https://jlcpcb
 - PCB thickness: Set to 0.8mm (for both boards)
 - Surface finish: ENIG heavily recommended for UI-board, mainboard can be HASL or ENIG
 - For mainboard activate either 'PCB assembly' (let JLCPCB handle assembly) or 'Solder stencil' (assemble board yourself)
-- Leave all other settings in their default state. When using PCB assembly services, extra files are necessary (not on Github yet)
+- Leave all other settings in their default state. When using PCB assembly services, the extra BOM and CPL files in the hardware folder are necessary (JLCPCB_Mainboard_V203_CPL.csv and JLCPCB_Mainboard_V203_BOM.csv)
+
+## PCB Assembly files
+
+The PCBA files (CPL and BOM) use some different parts than the ones shown in my videos (because of availability issues)
+These files look good in the JLCPCB order preview, however **I have not validated them yet through a real order**.
+Please keep this in mind before ordering, if you suspect an error in the files you can contact me via DM (contact info in main readme)
 
 ## Mainboard solder stencil
 
