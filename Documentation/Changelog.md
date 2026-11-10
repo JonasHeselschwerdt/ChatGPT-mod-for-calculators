@@ -51,6 +51,10 @@ Note: A text transfer tool to upload texts to the device was added
 - Added a device name variable (user-configurable)
 - Added a debug mode that enables experimental settings and debug messages
 
+## Version 2.0.1
+
+- Added support for alternative (cheaper) camera OV3660
+- Added a hardware compile control file for device configuration before flashing
 
 # Changelog - HTML local network hosting tool (text transfer tool)
 
@@ -101,11 +105,6 @@ Initial version:
 - Improved keypad button footprints
 - Added on-board LED for use during debugging (disconnected by default)
 - Added support for an external NTC-Thermistor for battery temperature monitoring
-
-## Version 2.0.1
-
-- Added support for alternative (cheaper) camera OV3660
-- Added a hardware compile control file for device configuration before flashing
 
 ## Version 2.0.1
 

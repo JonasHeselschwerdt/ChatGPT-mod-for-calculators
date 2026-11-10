@@ -34,6 +34,7 @@ camera.c: Functions related to the camera and image processing (using esp_camera
 
 #include "AI_calc_camera.h"
 #include "AI_calc_device.h"
+#include "AI_calc_hardware_cc.h"
 
 // #endregion
 
@@ -165,8 +166,14 @@ static esp_err_t ov5640_init(void){
     if (sensor == NULL){
         return ESP_FAIL;
     }
-    // Without this the images appear mirrored along the Y-Axis:
-    sensor->set_hmirror(sensor, 1);
+    // Different camera modules deliver the picture differently oriented:
+    // (not totally sure if this is the same for all models)
+    #if defined (CC_CAMERA_USED_OV5640)
+        sensor->set_hmirror(sensor, 1);
+    #endif
+    #if defined (CC_CAMERA_USED_OV3660)
+        sensor->set_vflip(sensor,1);
+    #endif
     return ESP_OK;
 }
 
