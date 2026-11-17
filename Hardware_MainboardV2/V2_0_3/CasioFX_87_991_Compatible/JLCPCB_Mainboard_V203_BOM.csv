@@ -10,8 +10,8 @@ C32,22pF,Capacitor_SMD:C_0603_1608Metric,C2169813
 D2,Yellow,LED_SMD:LED_0603_1608Metric,C5160703
 J1,Molex Picoblade 3P,Connector_Molex:Molex_PicoBlade_53261-0371_1x03-1MP_P1.25mm_Horizontal,C293630
 J3,Molex Picoblade 6P,Connector_Molex:Molex_PicoBlade_53261-0671_1x06-1MP_P1.25mm_Horizontal,C17393620
-J4,OV5640,ChatGPTonCalcsFootprints:24Pin_FPC_P0.5_small_MP,C262643
-J5,FPC 24P P0.5,ChatGPTonCalcsFootprints:24Pin_FPC_P0.5_small_MP,C262643
+J4,OV5640,ChatGPTonCalcsFootprints:24Pin_FPC_P0.5_RecommendedLayout,C262643
+J5,FPC 24P P0.5,ChatGPTonCalcsFootprints:24Pin_FPC_P0.5_RecommendedLayout,C262643
 L1,1.5uH,ChatGPTonCalcsFootprints:SPM5030VT-1R5M-D,C542312
 "Q1,Q2",SI2300DS-T1GE3,Package_TO_SOT_SMD:TSOT-23,C72271
 "Q3,Q4",FDV304P,Package_TO_SOT_SMD:TSOT-23,C10884
