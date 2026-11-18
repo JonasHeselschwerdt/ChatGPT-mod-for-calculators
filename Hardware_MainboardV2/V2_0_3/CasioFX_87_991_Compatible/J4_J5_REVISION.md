@@ -1,0 +1,9 @@
+# J4/J5 AFC07-S24ECA-00 mounting-land revision
+
+The previous reduced mounting lands do not match the connector manufacturer's recommended pattern. This draft adds 2.20 x 3.30 mm lands at (+/-7.35, 1.27) mm with copper, paste and mask openings, retains 0.30 x 1.20 mm signal pads at 0.50 mm pitch, and includes routing changes around the tabs. Signal net assignments are unchanged. BOM footprint names, schematic links and J4/J5 positions are updated.
+
+Editable KiCad sources are included alongside the updated source archive to make review possible. Open MainboardV203_Kicad/MainboardV203_Kicad/ChatGPTonCalcsMainBoard2.kicad_pro with KiCad 10. Local library and supplied AFC07 WRL paths are relative. The model is a visual reference; its Y offset is +0.164 mm to centre the mounting feet on the new lands. The source PCB nominal thickness is aligned to the ordering instructions at 0.8 mm. The 0.44 mm core in the nominal stackup is illustrative, not a manufacturer-approved impedance stackup.
+
+Validation: KiCad 10.0.8 zone refill, 0 unconnected items, J4/J5 schematic footprint consistency, mounting-pad copper/paste/mask output and 3D render. Hardware has not yet been manufactured or tested.
+
+This is a draft, not a manufacturing release. There are 44 clearance-rule errors, 91 warnings and 13 remaining schematic-parity findings (including U5/U10 pad definitions). Existing manufacturing Gerber ZIP and schematic PDF are from the previous release and have NOT been replaced. In particular, SW1 has 1.00 mm pitch in the current source while previous release fabrication data used 1.27 mm; this must be resolved before regenerating released fabrication assets. CPL pickup centres and rotations need assembler verification. The archive and loose source contain the same revised board. No PCB order or vendor quotation is part of this contribution.
